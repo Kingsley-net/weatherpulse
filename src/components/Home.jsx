@@ -296,7 +296,7 @@ const handleMap = ()=>{
   };
 
   return (
-    <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden fixed">
+    <div className="h-full w-full bg-gray-950/40 backdrop-blur-xl custom-bg gap-2 p-2 box-border overflow-hidden fixed">
       {/* Sidebar */}
       <div className="bg-gray-700/40 backdrop-blur-2xl rounded-xl text-white font-bold text-2xl md:flex flex-col items-center py-4 shadow-xl row-span-2 hidden">
         <House
