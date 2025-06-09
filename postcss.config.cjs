@@ -1,9 +1,7 @@
-// postcss.config.cjs
 module.exports = {
-  plugins: {
-    autoprefixer: {},
-    // IMPORTANT: You typically DO NOT need 'tailwindcss' here if you are using
-    // '@tailwindcss/vite' plugin in your vite.config.js for Tailwind CSS v4+.
-    // The @tailwindcss/vite plugin handles Tailwind's PostCSS integration.
-  },
+  plugins: [
+    require('autoprefixer'),
+    // TailwindCSS is likely already included via @tailwindcss/vite, but you can add it here if needed
+    // require('tailwindcss'),
+  ],
 };
