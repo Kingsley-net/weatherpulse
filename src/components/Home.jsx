@@ -296,7 +296,7 @@ const handleMap = ()=>{
   };
 
   return (
-    <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden">
+    <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden fixed">
       {/* Sidebar */}
       <div className="bg-gray-700/40 backdrop-blur-2xl rounded-xl text-white font-bold text-2xl md:flex flex-col items-center py-4 shadow-xl row-span-2 hidden">
         <House
@@ -435,7 +435,7 @@ const handleMap = ()=>{
       </div>
 
       {/* Footer */}
-      <div className="col-span-2 fixed bottom-0 bg-gray-950/50 backdrop-blur-lg rounded-xl h-12 flex justify-around items-center text-white md:hidden">
+      <div className="col-span-2 fixed bottom-0 right-0 left-0 bg-gray-950/50 backdrop-blur-lg rounded-xl h-auto flex justify-around items-center w-full text-white md:hidden">
         {navItems.map((nav) => (
           <button
             key={nav.id}
