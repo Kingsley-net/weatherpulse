@@ -66,7 +66,6 @@ export function Home() {
   const [active, setActive] = useState('Home');
   const [activeSearch, setActiveSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-   // New state for search input
 
   useEffect(() => {
     const fakeData = {
@@ -111,7 +110,7 @@ export function Home() {
 
           try {
             const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,rain,showers,snowfall,weather_code,snow_depth,precipitation,precipitation_probability,wind_speed_10m&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto&forecast_hours=24`
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,rain,showers,snowfall,weather_code,snow_depth,precipitation,precipitation_probability,wind_speed_10m¤t=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto&forecast_hours=24`
             );
             if (!weatherResponse.ok) throw new Error('Weather API failed');
             const weatherData = await weatherResponse.json();
@@ -166,11 +165,11 @@ export function Home() {
 
     getUserLocation();
   }, []);
-const handleMap = ()=>{
-  setActive('Home')
-}
 
-  // Handle city search
+  const handleMap = () => {
+    setActive('Home');
+  };
+
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery) return;
@@ -189,12 +188,11 @@ const handleMap = ()=>{
       setCoordinates({ latitude: parseFloat(lat), longitude: parseFloat(lon) });
       setCityData(display_name.split(',')[0]);
       setCountryData(display_name.split(',').pop());
-      setActive('Map'); // Switch to Map view
+      setActive('Map');
       setActiveSearch(false);
 
-      // Fetch weather data for new coordinates
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,rain,showers,snowfall,weather_code,snow_depth,precipitation,precipitation_probability,wind_speed_10m&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto&forecast_hours=24`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,rain,showers,snowfall,weather_code,snow_depth,precipitation,precipitation_probability,wind_speed_10m¤t=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto&forecast_hours=24`
       );
       if (!weatherResponse.ok) throw new Error('Weather API failed');
       const weatherData = await weatherResponse.json();
@@ -297,7 +295,7 @@ const handleMap = ()=>{
   return (
     <div className="h-screen w-full custom-bg gap-2 p-2 box-border">
       {/* Sidebar */}
-      <div className="bg-gray-700/40 backdrop-blur-2xl rounded-xl text-white font-bold text-2xl md:flex flex-col items-center py-4 shadow-xl row-span-2 hidden">
+      <div className="bg-gray-700/40 backdrop-blur-2xl rounded-xl text-white font-bold text-2xl md:flex flex-col items-center py-4 shadow-xl row-span-2 hidden md:flex md:w-16">
         <House
           onMouseOver={handleHovering1}
           onMouseOut={handleHoveringOut1}
@@ -334,51 +332,51 @@ const handleMap = ()=>{
 
       {/* Header/Weather Info */}
       <div className="text-white bg-gray-800/40 backdrop-blur-lg rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          <p className="font-bold text-base">WEATHERPULSE</p>
-          <p className="text-base font-semibold">
+        <div className="flex items-center justify-between flex-col sm:flex-row">
+          <p className="font-bold text-base sm:text-lg">WEATHERPULSE</p>
+          <p className="text-base sm:text-lg font-semibold">
             {dayOfWeek}, {day} {month}, {year}
           </p>
         </div>
         {weatherdata && !error ? (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center mt-4 sm:mt-2">
             <div className="flex items-center">
               <MapPin className="text-xl" />
               <div className="ml-2">
-                <p className="text-xl font-bold">{cityData || 'Loading...'}</p>
-                <p className="text-sm">{countryData || 'Loading...'}</p>
+                <p className="text-xl sm:text-2xl font-bold">{cityData || 'Loading...'}</p>
+                <p className="text-sm sm:text-base">{countryData || 'Loading...'}</p>
               </div>
             </div>
-            <p className="text-blue-500 font-bold text-4xl">
+            <p className="text-blue-500 font-bold text-4xl sm:text-5xl">
               {weatherdata.current?.temperature_2m ?? 'N/A'}°C
             </p>
-            <p className="text-sm">Temperature</p>
-            <div className="flex justify-around w-full mt-2">
-              <div>
-                <p className="text-blue-300 font-bold text-xl">
+            <p className="text-sm sm:text-base">Temperature</p>
+            <div className="flex justify-around w-full mt-2 sm:mt-4">
+              <div className="text-center">
+                <p className="text-blue-300 font-bold text-xl sm:text-2xl">
                   {weatherdata.current?.wind_direction_10m ?? 'N/A'}°
                 </p>
-                <p className="text-xs">Wind Direction</p>
+                <p className="text-xs sm:text-sm">Wind Direction</p>
               </div>
-              <div>
-                <p className="text-blue-300 font-bold text-xl">
+              <div className="text-center">
+                <p className="text-blue-300 font-bold text-xl sm:text-2xl">
                   {weatherdata.current?.wind_speed_10m ?? 'N/A'}Km/h
                 </p>
-                <p className="text-xs">Wind Speed</p>
+                <p className="text-xs sm:text-sm">Wind Speed</p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="text-red-500 text-center text-sm">{error || 'No data available'}</div>
+          <div className="text-red-500 text-center text-sm sm:text-base">{error || 'No data available'}</div>
         )}
       </div>
 
       {/* Main Content */}
-      <div className="bg-gray-300 rounded-xl p-4 overflow-hidden md:h-3/4 md:flex">
+      <div className="bg-gray-300 rounded-xl p-4 overflow-hidden md:h-3/4 flex-1 mt-2">
         {active === 'Home' && (
-          <div className="grid grid-cols-1 gap-4 h-full">
-            <div>
-              <h1 className="text-xl font-bold">Today's Forecast</h1>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
+            <div className="sm:pr-2">
+              <h1 className="text-xl sm:text-2xl font-bold">Today's Forecast</h1>
               {weatherdata?.hourly ? (
                 <Times
                   hourlyTimes={weatherdata.hourly.time}
@@ -386,16 +384,16 @@ const handleMap = ()=>{
                   weatherCode={weatherdata.hourly.weather_code}
                 />
               ) : (
-                <p className="text-red-500 text-sm">No hourly forecast data</p>
+                <p className="text-red-500 text-sm sm:text-base">No hourly forecast data</p>
               )}
             </div>
-            <div>
-              <h1 className="text-xl font-bold">Forecast Graph</h1>
-              <div className="w-full h-40 mt-2">
+            <div className="sm:pl-2">
+              <h1 className="text-xl sm:text-2xl font-bold">Forecast Graph</h1>
+              <div className="w-full h-40 sm:h-48 mt-2">
                 {weatherdata?.hourly && chartData ? (
                   <Line data={chartData} options={chartOptions} />
                 ) : (
-                  <p className="text-red-500 text-sm">No data for graph</p>
+                  <p className="text-red-500 text-sm sm:text-base">No data for graph</p>
                 )}
               </div>
             </div>
@@ -403,32 +401,33 @@ const handleMap = ()=>{
         )}
         {active === 'Map' && (
           <div className="w-full h-screen flex flex-col items-center justify-center absolute top-0 left-0 bg-gray-950">
-            <button className='right-1 text-white absolute top-1 'onClick={handleMap}><span><X/></span></button>
-            <h1 className="text-xl font-bold text-white">Map</h1>
+            <button className="right-1 text-white absolute top-1" onClick={handleMap}><span><X /></span></button>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">Map</h1>
             {coordinates ? (
               <MapContainer
                 center={[coordinates.latitude, coordinates.longitude]}
                 zoom={13}
-                style={{ height: '100%', width: '100%', borderRadius: '8px' }}
+                style={{ height: '80vh', width: '100%', borderRadius: '8px' }}
+                className="mt-2"
               >
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
                 <Marker position={[coordinates.latitude, coordinates.longitude]}>
                   <Popup>{cityData || 'Your Location'}</Popup>
                 </Marker>
               </MapContainer>
             ) : (
-              <p className="text-red-500 text-sm">Map loading or coordinates unavailable</p>
+              <p className="text-red-500 text-sm sm:text-base">Map loading or coordinates unavailable</p>
             )}
           </div>
         )}
         {active === 'Predict' && (
-          <div className=" w-full h-screen flex flex-col items-center justify-center absolute z-50 top-0 left-0 bg-gray-950">
-            <button className='right-1 text-white absolute top-1'onClick={handleMap}><span><X/></span></button>
-            <h1 className="text-2xl font-bold text-white">Predict</h1>
-            <p className="text-xl text-white">Prediction feature not yet implemented.</p>
+          <div className="w-full h-screen flex flex-col items-center justify-center absolute z-50 top-0 left-0 bg-gray-950">
+            <button className="right-1 text-white absolute top-1" onClick={handleMap}><span><X /></span></button>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Predict</h1>
+            <p className="text-xl sm:text-2xl text-white">Prediction feature not yet implemented.</p>
           </div>
         )}
       </div>
@@ -442,7 +441,7 @@ const handleMap = ()=>{
             className={`flex flex-col items-center justify-center font-bold ${active === nav.id ? 'text-blue-500 scale-105' : ''}`}
           >
             <p>{nav.icons}</p>
-            <p>{nav.label}</p>
+            <p className="text-xs sm:text-sm">{nav.label}</p>
           </button>
         ))}
         <button
@@ -450,24 +449,24 @@ const handleMap = ()=>{
           className="flex flex-col items-center justify-center font-bold focus:text-blue-500 scale-105"
         >
           <Search />
-          <p>Search</p>
+          <p className="text-xs sm:text-sm">Search</p>
         </button>
       </div>
 
       {/* Search Overlay */}
       {activeSearch && (
         <div className="flex flex-col justify-center items-center h-screen w-full absolute top-0 inset-0 bg-gray-950/50 backdrop-blur-md">
-          <form onSubmit={handleSearch} className="w-4/5 flex items-center">
+          <form onSubmit={handleSearch} className="w-4/5 sm:w-2/3 flex items-center">
             <input
               type="search"
               placeholder="Search city or postal code"
-              className="text-white w-full border border-blue-300 p-2 rounded-xl"
+              className="text-white w-full border border-blue-300 p-2 rounded-xl text-sm sm:text-base"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button
               type="submit"
-              className="ml-2 text-white font-bold border border-blue-300 p-2 rounded-xl"
+              className="ml-2 text-white font-bold border border-blue-300 p-2 rounded-xl text-sm sm:text-base"
             >
               Search
             </button>
@@ -482,7 +481,7 @@ const handleMap = ()=>{
       )}
 
       {loading && (
-        <div className="absolute inset-0 bg-gray-400 flex justify-center items-center text-2xl">
+        <div className="absolute inset-0 bg-gray-400 flex justify-center items-center text-2xl sm:text-3xl">
           <p>Loading...</p>
         </div>
       )}
