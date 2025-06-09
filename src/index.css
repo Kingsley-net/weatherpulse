@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.custom-bg{
+background-image: url('./components/images/night.jpeg');
+background-size: cover;
+background-position:center;
+height:100vh;
+}
