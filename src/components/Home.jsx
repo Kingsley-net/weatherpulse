@@ -296,7 +296,7 @@ const handleMap = ()=>{
   };
 
   return (
-    <div className="h-full w-full bg-gray-950/40 backdrop-blur-xl custom-bg gap-2 p-2 box-border overflow-hidden fixed">
+    <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden fixed">
       {/* Sidebar */}
       <div className="bg-gray-700/40 backdrop-blur-2xl rounded-xl text-white font-bold text-2xl md:flex flex-col items-center py-4 shadow-xl row-span-2 hidden">
         <House
@@ -375,7 +375,7 @@ const handleMap = ()=>{
       </div>
 
       {/* Main Content */}
-      <div className="bg-gray-300 rounded-xl p-4 overflow-hidden md:h-3/4 md:flex">
+      <div className="bg-gray-300 rounded-xl p-4 overflow-hidden mt-2 md:h-3/4 md:flex">
         {active === 'Home' && (
           <div className="grid grid-cols-1 gap-4 h-full">
             <div>
