@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 .custom-bg{
-background-image: url('./components/images/night.jpeg');
+background-image: url('./components/images/new.png');
 background-size: cover;
 background-position:center;
 height:100vh;
