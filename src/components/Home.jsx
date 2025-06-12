@@ -22,7 +22,6 @@ import {
   Legend,
 } from 'chart.js';
 
-// Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -247,9 +246,8 @@ export function Home() {
     }
   };
 
-  // Responsive sidebar (desktop) and bottom nav (mobile)
   return (
-    <div className="min-h-screen w-full bg-gradient-to-tr from-blue-50 via-blue-200 to-blue-400 p-0 md:flex">
+    <div className="relative min-h-screen w-full bg-gradient-to-tr from-blue-50 via-blue-200 to-blue-400 md:flex overflow-x-hidden">
       {/* Sidebar for desktop */}
       <nav className="hidden md:flex flex-col items-center py-8 px-2 gap-5 bg-white/80 h-screen min-w-[70px] shadow-xl z-20">
         {NAV_ITEMS.map((item) => (
@@ -278,7 +276,7 @@ export function Home() {
       </nav>
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col min-h-screen relative pb-20 md:pb-0">
+      <div className="flex-1 flex flex-col min-h-screen relative pb-20 md:pb-0 overflow-x-hidden">
         {/* Header */}
         <header className="flex justify-between items-center py-3 px-4 rounded-b-xl bg-white/80 shadow mb-2 sticky top-0 z-10">
           <span className="font-extrabold text-xl tracking-widest text-blue-900">WeatherPulse</span>
@@ -327,7 +325,7 @@ export function Home() {
             )}
 
             {active === 'Map' && (
-              <div className="fixed inset-0 z-30 bg-blue-950/85 flex flex-col items-center justify-center p-2">
+              <div className="fixed inset-0 z-30 bg-blue-950/85 flex flex-col items-center justify-center p-2 overflow-auto">
                 <button
                   className="absolute top-4 right-6 p-2 text-white rounded-full hover:bg-blue-900"
                   onClick={() => setActive('Home')}
@@ -359,7 +357,7 @@ export function Home() {
             )}
 
             {active === 'Predict' && (
-              <div className="fixed inset-0 z-40 bg-blue-950/85 flex flex-col items-center justify-center p-2">
+              <div className="fixed inset-0 z-40 bg-blue-950/85 flex flex-col items-center justify-center p-2 overflow-auto">
                 <button
                   className="absolute top-4 right-6 p-2 text-white rounded-full hover:bg-blue-900"
                   onClick={() => setActive('Home')}
