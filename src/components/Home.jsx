@@ -39,7 +39,7 @@ const NAV_ITEMS = [
 
 function WeatherCard({ weatherdata, city, country }) {
   return (
-    <div className="rounded-xl bg-gradient-to-br from-blue-900 via-blue-700 to-blue-400 shadow-lg p-6 flex flex-col items-center gap-2 text-white">
+    <div className="rounded-xl bg-gradient-to-br from-blue-900 via-blue-700 to-blue-400 shadow-lg p-6 flex flex-col items-center gap-2 text-white min-w-[220px]">
       <div className="flex items-center gap-2">
         <MapPin className="opacity-80" />
         <span className="font-bold text-lg">{city || 'Loading...'}</span>
@@ -247,144 +247,18 @@ export function Home() {
     }
   };
 
-  // Render
+  // Responsive sidebar (desktop) and bottom nav (mobile)
   return (
-    <div className="min-h-screen w-full bg-gradient-to-tr from-blue-50 via-blue-200 to-blue-400 p-3 pb-20 md:pb-4 flex flex-col gap-4 relative">
-      {/* Header */}
-      <header className="flex justify-between items-center py-2 px-4 rounded-xl bg-white/80 shadow mb-2">
-        <span className="font-extrabold text-xl tracking-widest text-blue-900">WeatherPulse</span>
-        <span className="text-sm font-semibold text-blue-900">
-          {dayOfWeek}, {day} {month}, {year}
-        </span>
-        <button
-          className="md:hidden p-2 rounded text-blue-900"
-          onClick={() => setActiveSearch(true)}
-          aria-label="Search location"
-        >
-          <Search />
-        </button>
-      </header>
-
-      {/* Weather Card */}
-      <main className="flex-1 w-full mx-auto max-w-3xl flex flex-col gap-4">
-        {error && (
-          <div className="bg-red-100 text-red-700 font-semibold rounded-lg px-4 py-2">{error}</div>
-        )}
-        {weatherdata && !error && (
-          <WeatherCard weatherdata={weatherdata} city={cityData} country={countryData} />
-        )}
-
-        {/* Main views */}
-        <section className="mt-2">
-          {active === 'Home' && (
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h2 className="font-bold text-blue-900 mb-2">Today's Forecast</h2>
-                {weatherdata?.hourly ? (
-                  <Times
-                    hourlyTimes={weatherdata.hourly.time}
-                    temperatures={weatherdata.hourly.temperature_2m}
-                    weatherCode={weatherdata.hourly.weather_code}
-                  />
-                ) : (
-                  <p className="text-red-600">No hourly forecast data</p>
-                )}
-              </div>
-              <div>
-                <h2 className="font-bold text-blue-900 mb-2">Forecast Chart</h2>
-                <ForecastChart weatherdata={weatherdata} />
-              </div>
-            </div>
-          )}
-
-          {active === 'Map' && (
-            <div className="fixed inset-0 z-30 bg-blue-950/85 flex flex-col items-center justify-center p-2">
-              <button
-                className="absolute top-4 right-6 p-2 text-white rounded-full hover:bg-blue-900"
-                onClick={() => setActive('Home')}
-                aria-label="Close Map"
-              >
-                <X />
-              </button>
-              <h2 className="text-2xl font-bold text-white mb-2">Map View</h2>
-              <div className="w-full max-w-xl h-96 rounded-xl overflow-hidden border-2 border-white shadow-lg">
-                {coordinates ? (
-                  <MapContainer
-                    center={[coordinates.latitude, coordinates.longitude]}
-                    zoom={13}
-                    style={{ height: '100%', width: '100%' }}
-                  >
-                    <TileLayer
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                    <Marker position={[coordinates.latitude, coordinates.longitude]}>
-                      <Popup>{cityData || 'Your Location'}</Popup>
-                    </Marker>
-                  </MapContainer>
-                ) : (
-                  <p className="text-red-100 text-center">Map loading or coordinates unavailable</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {active === 'Predict' && (
-            <div className="fixed inset-0 z-40 bg-blue-950/85 flex flex-col items-center justify-center p-2">
-              <button
-                className="absolute top-4 right-6 p-2 text-white rounded-full hover:bg-blue-900"
-                onClick={() => setActive('Home')}
-                aria-label="Close Prediction"
-              >
-                <X />
-              </button>
-              <h2 className="text-2xl font-bold text-white mb-2">Prediction</h2>
-              <p className="text-lg text-white opacity-80">Prediction feature not yet implemented.</p>
-            </div>
-          )}
-        </section>
-      </main>
-
-      {/* Search Overlay */}
-      {activeSearch && (
-        <div className="fixed inset-0 bg-blue-950/80 z-50 flex flex-col justify-center items-center">
-          <form
-            onSubmit={handleSearch}
-            className="w-11/12 max-w-md bg-white/95 p-6 rounded-2xl shadow flex items-center gap-2"
-          >
-            <input
-              type="search"
-              placeholder="Search city or postal code"
-              className="flex-1 border border-blue-400 rounded-lg px-3 py-2 text-blue-900"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-blue-700 transition"
-            >
-              Search
-            </button>
-          </form>
-          <button
-            className="absolute top-5 right-8 text-white bg-blue-700 hover:bg-blue-900 rounded-full p-2"
-            onClick={() => setActiveSearch(false)}
-            aria-label="Close Search"
-          >
-            <X />
-          </button>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <nav className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 flex justify-center items-center gap-8 bg-white/80 backdrop-blur-lg px-8 py-3 rounded-2xl shadow md:static md:p-0 md:bg-transparent md:shadow-none">
+    <div className="min-h-screen w-full bg-gradient-to-tr from-blue-50 via-blue-200 to-blue-400 p-0 md:flex">
+      {/* Sidebar for desktop */}
+      <nav className="hidden md:flex flex-col items-center py-8 px-2 gap-5 bg-white/80 h-screen min-w-[70px] shadow-xl z-20">
         {NAV_ITEMS.map((item) => (
           <button
             key={item.id}
-            className={`flex flex-col items-center px-2 py-1 transition ${
+            className={`flex flex-col items-center gap-1 rounded-lg p-2 transition-all ${
               active === item.id
-                ? 'text-blue-700 font-bold scale-110'
-                : 'text-blue-900 opacity-80 hover:text-blue-700'
+                ? 'text-blue-700 bg-blue-100 shadow scale-110'
+                : 'text-blue-900 opacity-70 hover:text-blue-700'
             }`}
             onClick={() => setActive(item.id)}
             aria-label={item.label}
@@ -394,8 +268,8 @@ export function Home() {
           </button>
         ))}
         <button
+          className="flex flex-col items-center gap-1 rounded-lg p-2 text-blue-900 opacity-70 hover:text-blue-700 mt-auto"
           onClick={() => setActiveSearch(true)}
-          className="flex flex-col items-center px-2 py-1 text-blue-900 opacity-80 hover:text-blue-700"
           aria-label="Search"
         >
           <Search />
@@ -403,11 +277,167 @@ export function Home() {
         </button>
       </nav>
 
-      {loading && (
-        <div className="fixed inset-0 bg-blue-200/80 flex justify-center items-center z-50">
-          <p className="text-2xl text-blue-900 font-bold">Loading...</p>
-        </div>
-      )}
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col min-h-screen relative pb-20 md:pb-0">
+        {/* Header */}
+        <header className="flex justify-between items-center py-3 px-4 rounded-b-xl bg-white/80 shadow mb-2 sticky top-0 z-10">
+          <span className="font-extrabold text-xl tracking-widest text-blue-900">WeatherPulse</span>
+          <span className="text-sm font-semibold text-blue-900">
+            {dayOfWeek}, {day} {month}, {year}
+          </span>
+          <button
+            className="md:hidden p-2 rounded text-blue-900"
+            onClick={() => setActiveSearch(true)}
+            aria-label="Search location"
+          >
+            <Search />
+          </button>
+        </header>
+
+        {/* Weather Card and Forecast */}
+        <main className="w-full max-w-4xl mx-auto flex-1 flex flex-col gap-4 p-3">
+          {error && (
+            <div className="bg-red-100 text-red-700 font-semibold rounded-lg px-4 py-2">{error}</div>
+          )}
+          {weatherdata && !error && (
+            <WeatherCard weatherdata={weatherdata} city={cityData} country={countryData} />
+          )}
+
+          {/* Main views */}
+          <section className="mt-2">
+            {active === 'Home' && (
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h2 className="font-bold text-blue-900 mb-2">Today's Forecast</h2>
+                  {weatherdata?.hourly ? (
+                    <Times
+                      hourlyTimes={weatherdata.hourly.time}
+                      temperatures={weatherdata.hourly.temperature_2m}
+                      weatherCode={weatherdata.hourly.weather_code}
+                    />
+                  ) : (
+                    <p className="text-red-600">No hourly forecast data</p>
+                  )}
+                </div>
+                <div>
+                  <h2 className="font-bold text-blue-900 mb-2">Forecast Chart</h2>
+                  <ForecastChart weatherdata={weatherdata} />
+                </div>
+              </div>
+            )}
+
+            {active === 'Map' && (
+              <div className="fixed inset-0 z-30 bg-blue-950/85 flex flex-col items-center justify-center p-2">
+                <button
+                  className="absolute top-4 right-6 p-2 text-white rounded-full hover:bg-blue-900"
+                  onClick={() => setActive('Home')}
+                  aria-label="Close Map"
+                >
+                  <X />
+                </button>
+                <h2 className="text-2xl font-bold text-white mb-2">Map View</h2>
+                <div className="w-full max-w-xl h-96 rounded-xl overflow-hidden border-2 border-white shadow-lg">
+                  {coordinates ? (
+                    <MapContainer
+                      center={[coordinates.latitude, coordinates.longitude]}
+                      zoom={13}
+                      style={{ height: '100%', width: '100%' }}
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      />
+                      <Marker position={[coordinates.latitude, coordinates.longitude]}>
+                        <Popup>{cityData || 'Your Location'}</Popup>
+                      </Marker>
+                    </MapContainer>
+                  ) : (
+                    <p className="text-red-100 text-center">Map loading or coordinates unavailable</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {active === 'Predict' && (
+              <div className="fixed inset-0 z-40 bg-blue-950/85 flex flex-col items-center justify-center p-2">
+                <button
+                  className="absolute top-4 right-6 p-2 text-white rounded-full hover:bg-blue-900"
+                  onClick={() => setActive('Home')}
+                  aria-label="Close Prediction"
+                >
+                  <X />
+                </button>
+                <h2 className="text-2xl font-bold text-white mb-2">Prediction</h2>
+                <p className="text-lg text-white opacity-80">Prediction feature not yet implemented.</p>
+              </div>
+            )}
+          </section>
+        </main>
+
+        {/* Bottom nav for mobile */}
+        <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-white/90 backdrop-blur-lg z-20 px-2 py-2 flex justify-around items-center border-t border-blue-200">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-all ${
+                active === item.id
+                  ? 'text-blue-700 bg-blue-100 shadow scale-110'
+                  : 'text-blue-900 opacity-70 hover:text-blue-700'
+              }`}
+              onClick={() => setActive(item.id)}
+              aria-label={item.label}
+            >
+              {item.icon}
+              <span className="text-xs">{item.label}</span>
+            </button>
+          ))}
+          <button
+            className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-blue-900 opacity-70 hover:text-blue-700"
+            onClick={() => setActiveSearch(true)}
+            aria-label="Search"
+          >
+            <Search />
+            <span className="text-xs">Search</span>
+          </button>
+        </nav>
+
+        {/* Search Overlay */}
+        {activeSearch && (
+          <div className="fixed inset-0 bg-blue-950/80 z-50 flex flex-col justify-center items-center">
+            <form
+              onSubmit={handleSearch}
+              className="w-11/12 max-w-md bg-white/95 p-6 rounded-2xl shadow flex items-center gap-2"
+            >
+              <input
+                type="search"
+                placeholder="Search city or postal code"
+                className="flex-1 border border-blue-400 rounded-lg px-3 py-2 text-blue-900"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-blue-700 transition"
+              >
+                Search
+              </button>
+            </form>
+            <button
+              className="absolute top-5 right-8 text-white bg-blue-700 hover:bg-blue-900 rounded-full p-2"
+              onClick={() => setActiveSearch(false)}
+              aria-label="Close Search"
+            >
+              <X />
+            </button>
+          </div>
+        )}
+
+        {loading && (
+          <div className="fixed inset-0 bg-blue-200/80 flex justify-center items-center z-50">
+            <p className="text-2xl text-blue-900 font-bold">Loading...</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
