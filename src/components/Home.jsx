@@ -66,7 +66,6 @@ export function Home() {
   const [active, setActive] = useState('Home');
   const [activeSearch, setActiveSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-   // New state for search input
 
   useEffect(() => {
     const fakeData = {
@@ -166,9 +165,10 @@ export function Home() {
 
     getUserLocation();
   }, []);
-  const handleMap = ()=>{
-    setActive('Home')
-  }
+
+  const handleMap = () => {
+    setActive('Home');
+  };
 
   // Handle city search
   const handleSearch = async (e) => {
@@ -217,6 +217,61 @@ export function Home() {
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
 
+  // Chart Data and Options (Best fit for weather app)
+  const chartData =
+    weatherdata?.hourly && weatherdata.hourly.temperature_2m
+      ? {
+          labels: weatherdata.hourly.time.map((time) =>
+            new Date(time).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+          ),
+          datasets: [
+            {
+              label: 'Temperature (°C)',
+              data: weatherdata.hourly.temperature_2m.map((t) => Number(t)),
+              borderColor: '#38bdf8', // sky-400
+              backgroundColor: 'rgba(56,189,248,0.2)', // sky-400/20
+              pointBackgroundColor: '#1e293b', // slate-800
+              pointBorderColor: '#38bdf8',
+              pointRadius: 4,
+              fill: true,
+              tension: 0.35,
+            },
+          ],
+        }
+      : null;
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+        labels: { color: '#fff', font: { size: 11 } },
+      },
+      title: {
+        display: false,
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: '#334155',
+        titleColor: '#38bdf8',
+        bodyColor: '#fff',
+      },
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(148,163,184,0.2)' }, // slate-400/20
+        ticks: { color: '#fff', maxTicksLimit: 8, font: { size: 10 } },
+      },
+      y: {
+        grid: { color: 'rgba(148,163,184,0.2)' },
+        ticks: { color: '#fff', font: { size: 10 } },
+        beginAtZero: false,
+      },
+    },
+  };
+
   const formatTime = (isoTime) => {
     try {
       return new Date(isoTime).toLocaleString('en-US', {
@@ -227,47 +282,6 @@ export function Home() {
     } catch (e) {
       return 'N/A';
     }
-  };
-
-  const chartData = weatherdata?.hourly && {
-    labels: weatherdata.hourly.time.map((time) => formatTime(time)),
-    datasets: [
-      {
-        label: 'Temp (°C)',
-        data: weatherdata.hourly.temperature_2m,
-        borderColor: 'yellow',
-        backgroundColor: 'white',
-        fill: true,
-        tension: 0.4,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: { color: 'white', font: { size: 10 } },
-      },
-      title: {
-        display: true,
-        text: 'Hourly Temp',
-        color: 'white',
-        font: { size: 12 },
-      },
-    },
-    scales: {
-      x: {
-        title: { display: false },
-        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } },
-      },
-      y: {
-        title: { display: false },
-        ticks: { color: 'white', font: { size: 10 } },
-      },
-    },
   };
 
   const handleNavigation = (id) => setActive(id);
@@ -406,8 +420,8 @@ export function Home() {
               )}
             </div>
             <div>
-              <h1 className="text-xl font-bold">Forecast Graph</h1>
-              <div className="w-full h-40 mt-2">
+              <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
+              <div className="w-full h-40 mt-2 bg-transparent">
                 {weatherdata?.hourly && chartData ? (
                   <Line data={chartData} options={chartOptions} />
                 ) : (
@@ -450,7 +464,7 @@ export function Home() {
           {coordinates ? (
             <MapContainer
               center={[coordinates.latitude, coordinates.longitude]}
-              zoom={13}
+              zoom={50}
               style={{ height: '80%', width: '80%', borderRadius: '8px' }}
             >
               <TileLayer
