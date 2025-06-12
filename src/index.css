@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 .custom-bg{
-background-image: url('./components/images/newt.png');
+background-image: url('./components/images/newt.jpg');
 background-size: cover;
 background-position:center;
 height:100vh;
