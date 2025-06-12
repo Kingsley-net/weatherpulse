@@ -25,9 +25,9 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Import Leaflet components
+import L from 'leaflet'; // Import Leaflet for marker customization
+import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -66,6 +66,7 @@ export function Home() {
   const [active, setActive] = useState('Home');
   const [activeSearch, setActiveSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+   // New state for search input
 
   useEffect(() => {
     const fakeData = {
@@ -165,10 +166,9 @@ export function Home() {
 
     getUserLocation();
   }, []);
-
-  const handleMap = () => {
-    setActive('Home');
-  };
+  const handleMap = ()=>{
+    setActive('Home')
+  }
 
   // Handle city search
   const handleSearch = async (e) => {
@@ -189,9 +189,10 @@ export function Home() {
       setCoordinates({ latitude: parseFloat(lat), longitude: parseFloat(lon) });
       setCityData(display_name.split(',')[0]);
       setCountryData(display_name.split(',').pop());
-      setActive('Map');
+      setActive('Map'); // Switch to Map view
       setActiveSearch(false);
 
+      // Fetch weather data for new coordinates
       const weatherResponse = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_hours&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
       );
@@ -293,6 +294,22 @@ export function Home() {
     setSearchQuery('');
   };
 
+  // Helper: Safely get current weather from either API or fake data
+  const getCurrentTemperature = () =>
+    weatherdata?.current?.temperature_2m ??
+    weatherdata?.current_weather?.temperature ??
+    'N/A';
+
+  const getCurrentWindDirection = () =>
+    weatherdata?.current?.wind_direction_10m ??
+    weatherdata?.current_weather?.winddirection ??
+    'N/A';
+
+  const getCurrentWindSpeed = () =>
+    weatherdata?.current?.wind_speed_10m ??
+    weatherdata?.current_weather?.windspeed ??
+    'N/A';
+
   return (
     <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden fixed">
       {/* Sidebar */}
@@ -349,19 +366,19 @@ export function Home() {
               </div>
             </div>
             <p className="text-blue-500 font-bold text-4xl">
-              {weatherdata.current?.temperature_2m ?? 'N/A'}°C
+              {getCurrentTemperature()}°C
             </p>
             <p className="text-sm">Temperature</p>
             <div className="flex justify-around w-full mt-2">
               <div>
                 <p className="text-blue-300 font-bold text-xl">
-                  {weatherdata.current?.wind_direction_10m ?? 'N/A'}°
+                  {getCurrentWindDirection()}°
                 </p>
                 <p className="text-xs">Wind Direction</p>
               </div>
               <div>
                 <p className="text-blue-300 font-bold text-xl">
-                  {weatherdata.current?.wind_speed_10m ?? 'N/A'}Km/h
+                  {getCurrentWindSpeed()}Km/h
                 </p>
                 <p className="text-xs">Wind Speed</p>
               </div>
@@ -433,7 +450,7 @@ export function Home() {
           {coordinates ? (
             <MapContainer
               center={[coordinates.latitude, coordinates.longitude]}
-              zoom={50}
+              zoom={13}
               style={{ height: '80%', width: '80%', borderRadius: '8px' }}
             >
               <TileLayer
