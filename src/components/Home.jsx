@@ -436,7 +436,7 @@ export function Home() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
-              <div className="w-full h-60 mt-2 bg-transparent">
+              <div className="w-full h-40 mt-2 bg-transparent">
                 {weatherdata?.hourly && chartData ? (
                   <Line data={chartData} options={chartOptions} />
                 ) : (
@@ -481,7 +481,7 @@ export function Home() {
           {coordinates ? (
             <MapContainer
               center={[coordinates.latitude, coordinates.longitude]}
-              zoom={50}
+              zoom={13}
               style={{ height: '80%', width: '80%', borderRadius: '8px' }}
             >
               <TileLayer
