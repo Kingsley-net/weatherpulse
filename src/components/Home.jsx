@@ -250,23 +250,23 @@ const handleMap = ()=>{
     plugins: {
       legend: {
         position: 'top',
-        labels: { color: '#1f2937', font: { size: 10 } },
+        labels: { color: 'yellow', font: { size: 10 } },
       },
       title: {
         display: true,
         text: 'Hourly Temp',
-        color: '#1f2937',
+        color: 'yellow',
         font: { size: 12 },
       },
     },
     scales: {
       x: {
         title: { display: false },
-        ticks: { color: '#1f2937', maxTicksLimit: 6, font: { size: 10 } },
+        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } },
       },
       y: {
         title: { display: false },
-        ticks: { color: '#1f2937', font: { size: 10 } },
+        ticks: { color: 'white', font: { size: 10 } },
       },
     },
   };
@@ -403,14 +403,14 @@ const handleMap = ()=>{
           </div>
         )}
         {active === 'Map' && (
-          <div className="w-full h-screen flex flex-col items-center justify-center absolute top-0 left-0 bg-gray-950">
+          <div className="w-full h-screen flex flex-col items-center justify-center absolute top-0 left-0 transparent backdrop-blur-2xl">
             <button className='right-1 text-white absolute top-1 'onClick={handleMap}><span><X/></span></button>
             <h1 className="text-xl font-bold text-white">Map</h1>
             {coordinates ? (
               <MapContainer
                 center={[coordinates.latitude, coordinates.longitude]}
                 zoom={13}
-                style={{ height: '100%', width: '100%', borderRadius: '8px' }}
+                style={{ height: '80%', width: '80%', borderRadius: '8px' }}
               >
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
