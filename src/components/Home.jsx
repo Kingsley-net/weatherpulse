@@ -1,4 +1,3 @@
-
 import {
   Bell,
   User,
@@ -26,9 +25,9 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Import Leaflet components
-import L from 'leaflet'; // Import Leaflet for marker customization
-import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -67,7 +66,6 @@ export function Home() {
   const [active, setActive] = useState('Home');
   const [activeSearch, setActiveSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-   // New state for search input
 
   useEffect(() => {
     const fakeData = {
@@ -112,7 +110,7 @@ export function Home() {
 
           try {
             const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,rain,showers,snowfall,weather_code,snow_depth,precipitation,precipitation_probability,wind_speed_10m&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto&forecast_hours=24`
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_hours&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
             );
             if (!weatherResponse.ok) throw new Error('Weather API failed');
             const weatherData = await weatherResponse.json();
@@ -167,9 +165,10 @@ export function Home() {
 
     getUserLocation();
   }, []);
-const handleMap = ()=>{
-  setActive('Home')
-}
+
+  const handleMap = () => {
+    setActive('Home');
+  };
 
   // Handle city search
   const handleSearch = async (e) => {
@@ -190,12 +189,11 @@ const handleMap = ()=>{
       setCoordinates({ latitude: parseFloat(lat), longitude: parseFloat(lon) });
       setCityData(display_name.split(',')[0]);
       setCountryData(display_name.split(',').pop());
-      setActive('Map'); // Switch to Map view
+      setActive('Map');
       setActiveSearch(false);
 
-      // Fetch weather data for new coordinates
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,rain,showers,snowfall,weather_code,snow_depth,precipitation,precipitation_probability,wind_speed_10m&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,showers,snowfall,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto&forecast_hours=24`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_hours&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
       );
       if (!weatherResponse.ok) throw new Error('Weather API failed');
       const weatherData = await weatherResponse.json();
@@ -402,36 +400,6 @@ const handleMap = ()=>{
             </div>
           </div>
         )}
-        {active === 'Map' && (
-          <div className="w-full h-screen flex flex-col items-center justify-center absolute top-0 left-0 transparent backdrop-blur-2xl">
-            <button className='right-1 text-white absolute top-1 'onClick={handleMap}><span><X/></span></button>
-            <h1 className="text-xl font-bold text-white">Map</h1>
-            {coordinates ? (
-              <MapContainer
-                center={[coordinates.latitude, coordinates.longitude]}
-                zoom={50}
-                style={{ height: '80%', width: '80%', borderRadius: '8px' }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                <Marker position={[coordinates.latitude, coordinates.longitude]}>
-                  <Popup>{cityData || 'Your Location'}</Popup>
-                </Marker>
-              </MapContainer>
-            ) : (
-              <p className="text-red-500 text-sm">Map loading or coordinates unavailable</p>
-            )}
-          </div>
-        )}
-        {active === 'Predict' && (
-          <div className=" w-full h-screen flex flex-col items-center justify-center absolute z-50 top-0 left-0 bg-gray-950">
-            <button className='right-1 text-white absolute top-1'onClick={handleMap}><span><X/></span></button>
-            <h1 className="text-2xl font-bold text-white">Predict</h1>
-            <p className="text-xl text-white">Prediction feature not yet implemented.</p>
-          </div>
-        )}
       </div>
 
       {/* Footer */}
@@ -455,9 +423,47 @@ const handleMap = ()=>{
         </button>
       </div>
 
+      {/* Map Overlay */}
+      {active === 'Map' && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/70 backdrop-blur-2xl">
+          <button className="absolute top-1 right-2 text-white" onClick={handleMap}>
+            <X />
+          </button>
+          <h1 className="text-xl font-bold text-white">Map</h1>
+          {coordinates ? (
+            <MapContainer
+              center={[coordinates.latitude, coordinates.longitude]}
+              zoom={50}
+              style={{ height: '80%', width: '80%', borderRadius: '8px' }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker position={[coordinates.latitude, coordinates.longitude]}>
+                <Popup>{cityData || 'Your Location'}</Popup>
+              </Marker>
+            </MapContainer>
+          ) : (
+            <p className="text-red-500 text-sm">Map loading or coordinates unavailable</p>
+          )}
+        </div>
+      )}
+
+      {/* Predict Overlay */}
+      {active === 'Predict' && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/90">
+          <button className="absolute top-1 right-2 text-white" onClick={handleMap}>
+            <X />
+          </button>
+          <h1 className="text-2xl font-bold text-white">Predict</h1>
+          <p className="text-xl text-white">Prediction feature not yet implemented.</p>
+        </div>
+      )}
+
       {/* Search Overlay */}
       {activeSearch && (
-        <div className="flex flex-col justify-center items-center h-screen w-full absolute top-0 inset-0 bg-gray-950/50 backdrop-blur-md">
+        <div className="flex flex-col justify-center items-center h-screen w-full fixed top-0 left-0 bg-gray-950/50 backdrop-blur-md z-50">
           <form onSubmit={handleSearch} className="w-4/5 flex items-center">
             <input
               type="search"
