@@ -375,11 +375,11 @@ const handleMap = ()=>{
       </div>
 
       {/* Main Content */}
-      <div className="transparent backdrop-blur-sm rounded-xl p-4 overflow-hidden mt-2 md:h-3/4 md:flex">
+      <div className="transparent relative backdrop-blur-sm rounded-xl p-4 overflow-hidden mt-2 md:h-3/4 md:flex">
         {active === 'Home' && (
           <div className="grid grid-cols-1 gap-4 h-full">
             <div>
-              <h1 className="text-xl font-bold">Today's Forecast</h1>
+              <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
               {weatherdata?.hourly ? (
                 <Times
                   hourlyTimes={weatherdata.hourly.time}
@@ -403,7 +403,7 @@ const handleMap = ()=>{
           </div>
         )}
         {active === 'Map' && (
-          <div className="w-full h-screen flex flex-col items-center justify-center absolute top-0  transparent backdrop-blur-2xl">
+          <div className="w-full h-screen flex flex-col items-center justify-center absolute top-0 left-0 transparent backdrop-blur-2xl">
             <button className='right-1 text-white absolute top-1 'onClick={handleMap}><span><X/></span></button>
             <h1 className="text-xl font-bold text-white">Map</h1>
             {coordinates ? (
