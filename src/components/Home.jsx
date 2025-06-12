@@ -25,9 +25,9 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Import Leaflet components
-import L from 'leaflet'; // Import Leaflet for marker customization
-import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -189,10 +189,9 @@ export function Home() {
       setCoordinates({ latitude: parseFloat(lat), longitude: parseFloat(lon) });
       setCityData(display_name.split(',')[0]);
       setCountryData(display_name.split(',').pop());
-      setActive('Map'); // Switch to Map view
+      setActive('Map');
       setActiveSearch(false);
 
-      // Fetch weather data for new coordinates
       const weatherResponse = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_hours&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
       );
@@ -217,24 +216,34 @@ export function Home() {
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
 
-  // Chart Data and Options (Best fit for weather app)
+  // Chart Data and Options (clean, realistic, not jam-packed, and visually fitting)
   const chartData =
     weatherdata?.hourly && weatherdata.hourly.temperature_2m
       ? {
-          labels: weatherdata.hourly.time.map((time) =>
-            new Date(time).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+          labels: weatherdata.hourly.time.map((time, idx) =>
+            [0, 4, 8, 12, 16, 20].includes(idx)
+              ? new Date(time).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+              : ""
           ),
           datasets: [
             {
               label: 'Temperature (°C)',
               data: weatherdata.hourly.temperature_2m.map((t) => Number(t)),
               borderColor: '#38bdf8', // sky-400
-              backgroundColor: 'rgba(56,189,248,0.2)', // sky-400/20
-              pointBackgroundColor: '#1e293b', // slate-800
-              pointBorderColor: '#38bdf8',
-              pointRadius: 4,
+              backgroundColor: function(context) {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) {
+                  return null;
+                }
+                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                gradient.addColorStop(0, "rgba(56,189,248,0.5)");
+                gradient.addColorStop(1, "rgba(224,242,254,0.1)");
+                return gradient;
+              },
+              pointRadius: 0,
               fill: true,
-              tension: 0.35,
+              tension: 0.4,
             },
           ],
         }
@@ -245,9 +254,7 @@ export function Home() {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: true,
-        position: 'top',
-        labels: { color: '#fff', font: { size: 11 } },
+        display: false,
       },
       title: {
         display: false,
@@ -261,12 +268,20 @@ export function Home() {
     },
     scales: {
       x: {
-        grid: { color: 'rgba(148,163,184,0.2)' }, // slate-400/20
-        ticks: { color: '#fff', maxTicksLimit: 8, font: { size: 10 } },
+        grid: { color: 'rgba(148,163,184,0.14)' },
+        ticks: {
+          color: '#fff',
+          font: { size: 12 },
+          callback: function(value, index, ticks) {
+            return this.getLabelForValue(value) || null;
+          },
+          maxTicksLimit: 6,
+          autoSkip: false,
+        },
       },
       y: {
-        grid: { color: 'rgba(148,163,184,0.2)' },
-        ticks: { color: '#fff', font: { size: 10 } },
+        grid: { color: 'rgba(148,163,184,0.16)' },
+        ticks: { color: '#fff', font: { size: 12 } },
         beginAtZero: false,
       },
     },
@@ -421,7 +436,7 @@ export function Home() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
-              <div className="w-full h-40 mt-2 bg-transparent">
+              <div className="w-full h-60 mt-2 bg-transparent">
                 {weatherdata?.hourly && chartData ? (
                   <Line data={chartData} options={chartOptions} />
                 ) : (
@@ -433,24 +448,26 @@ export function Home() {
         )}
       </div>
 
-      {/* Footer */}
-      <div className="col-span-2 fixed bottom-0 right-0 left-0 bg-gray-950/50 backdrop-blur-lg rounded-xl h-auto flex justify-around items-center w-full text-white md:hidden">
+      {/* Footer - Mobile Bottom Navigation */}
+      <div className="col-span-2 fixed bottom-0 right-0 left-0 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-700 shadow-2xl backdrop-blur-lg rounded-t-xl h-auto flex justify-around items-center w-full text-white md:hidden">
         {navItems.map((nav) => (
           <button
             key={nav.id}
             onClick={() => setActive(nav.id)}
-            className={`flex flex-col items-center justify-center font-bold ${active === nav.id ? 'text-blue-500 scale-105' : ''}`}
+            className={`flex flex-col items-center justify-center font-bold py-2 px-3 transition-all duration-200 ${
+              active === nav.id ? 'text-yellow-300 scale-110 drop-shadow-lg' : 'opacity-80'
+            }`}
           >
             <p>{nav.icons}</p>
-            <p>{nav.label}</p>
+            <p className="text-xs mt-1">{nav.label}</p>
           </button>
         ))}
         <button
           onClick={searching}
-          className="flex flex-col items-center justify-center font-bold focus:text-blue-500 scale-105"
+          className="flex flex-col items-center justify-center font-bold py-2 px-3 transition-all duration-200 opacity-80 focus:text-yellow-300"
         >
           <Search />
-          <p>Search</p>
+          <p className="text-xs mt-1">Search</p>
         </button>
       </div>
 
