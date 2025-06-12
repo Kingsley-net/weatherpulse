@@ -1,3 +1,4 @@
+
 import {
   Bell,
   User,
@@ -295,7 +296,7 @@ const handleMap = ()=>{
   };
 
   return (
-    <div className="h-screen w-full custom-bg gap-2 p-2 box-border">
+    <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden fixed">
       {/* Sidebar */}
       <div className="bg-gray-700/40 backdrop-blur-2xl rounded-xl text-white font-bold text-2xl md:flex flex-col items-center py-4 shadow-xl row-span-2 hidden">
         <House
@@ -333,7 +334,7 @@ const handleMap = ()=>{
       </div>
 
       {/* Header/Weather Info */}
-      <div className="text-white bg-gray-800/40 backdrop-blur-lg rounded-xl p-4">
+      <div className="text-white bg-gray-800/40 backdrop-blur-lg rounded-xl p-4 ">
         <div className="flex items-center justify-between">
           <p className="font-bold text-base">WEATHERPULSE</p>
           <p className="text-base font-semibold">
@@ -374,7 +375,7 @@ const handleMap = ()=>{
       </div>
 
       {/* Main Content */}
-      <div className="bg-gray-300 rounded-xl p-4 overflow-hidden md:h-3/4 md:flex">
+      <div className="bg-gray-300 rounded-xl p-4 overflow-hidden mt-2 md:h-3/4 md:flex">
         {active === 'Home' && (
           <div className="grid grid-cols-1 gap-4 h-full">
             <div>
@@ -434,7 +435,7 @@ const handleMap = ()=>{
       </div>
 
       {/* Footer */}
-      <div className="col-span-2 bottom-0 bg-gray-950/50 backdrop-blur-lg rounded-xl h-12 flex justify-around items-center text-white md:hidden">
+      <div className="col-span-2 fixed bottom-0 right-0 left-0 bg-gray-950/50 backdrop-blur-lg rounded-xl h-auto flex justify-around items-center w-full text-white md:hidden">
         {navItems.map((nav) => (
           <button
             key={nav.id}
