@@ -69,7 +69,7 @@ export default function Times({ hourlyTimes, temperatures, weatherCode }) {
       {hourlyTimes.map((time, index) => (
         <div
           key={index}
-          className="relative bg-blue-400 h-30 mr-2 min-w-1/5 rounded-lg text-white flex flex-col items-center justify-around font-bold"
+          className="relative bg-white/40 backdrop-blur-3xl  h-30 mr-2 min-w-1/5 rounded-lg text-white flex flex-col items-center justify-around font-bold"
         >
           <p>{formatTime(time)}</p>
           <img src={getWeatherImage(weatherCode[index], time)} className="w-16" />
