@@ -450,7 +450,7 @@ export function Home() {
           {coordinates ? (
             <MapContainer
               center={[coordinates.latitude, coordinates.longitude]}
-              zoom={13}
+              zoom={50}
               style={{ height: '80%', width: '80%', borderRadius: '8px' }}
             >
               <TileLayer
@@ -505,9 +505,28 @@ export function Home() {
         </div>
       )}
 
+      {/* Weather-like Loading Overlay */}
       {loading && (
-        <div className="absolute inset-0 bg-gray-400 flex justify-center items-center text-2xl">
-          <p>Loading...</p>
+        <div className="fixed inset-0 flex justify-center items-center bg-gradient-to-b from-blue-200/80 via-gray-300/80 to-white/80 z-50">
+          <div className="flex flex-col items-center">
+            <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-cloud-move">
+              <ellipse cx="60" cy="55" rx="35" ry="18" fill="#dbeafe" />
+              <ellipse cx="45" cy="45" rx="20" ry="15" fill="#bae6fd" />
+              <ellipse cx="80" cy="45" rx="24" ry="16" fill="#a5b4fc" />
+              <ellipse cx="70" cy="60" rx="32" ry="13" fill="#e0e7ff" />
+            </svg>
+            <span className="mt-4 text-blue-900 text-2xl font-extrabold tracking-wide animate-pulse">Loading Weather...</span>
+          </div>
+          <style>{`
+            @keyframes cloud-move {
+              0% { transform: translateX(0); }
+              50% { transform: translateX(10px); }
+              100% { transform: translateX(0); }
+            }
+            .animate-cloud-move {
+              animation: cloud-move 2.2s ease-in-out infinite;
+            }
+          `}</style>
         </div>
       )}
     </div>
