@@ -334,7 +334,7 @@ const handleMap = ()=>{
       </div>
 
       {/* Header/Weather Info */}
-      <div className="text-white transparent backdrop-blur-lg rounded-xl p-4 ">
+      <div className="text-white transparent backdrop-blur-sm rounded-xl p-4 ">
         <div className="flex items-center justify-between">
           <p className="font-bold text-base">WEATHERPULSE</p>
           <p className="text-base font-semibold">
@@ -375,7 +375,7 @@ const handleMap = ()=>{
       </div>
 
       {/* Main Content */}
-      <div className="transparent  rounded-xl p-4 overflow-hidden mt-2 md:h-3/4 md:flex">
+      <div className="transparent backdrop-blur-sm rounded-xl p-4 overflow-hidden mt-2 md:h-3/4 md:flex">
         {active === 'Home' && (
           <div className="grid grid-cols-1 gap-4 h-full">
             <div>
