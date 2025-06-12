@@ -403,13 +403,13 @@ const handleMap = ()=>{
           </div>
         )}
         {active === 'Map' && (
-          <div className="w-full h-screen flex flex-col items-center justify-center absolute top-0 left-0 transparent backdrop-blur-2xl">
+          <div className="w-full h-screen flex flex-col items-center justify-center absolute top-0  transparent backdrop-blur-2xl">
             <button className='right-1 text-white absolute top-1 'onClick={handleMap}><span><X/></span></button>
             <h1 className="text-xl font-bold text-white">Map</h1>
             {coordinates ? (
               <MapContainer
                 center={[coordinates.latitude, coordinates.longitude]}
-                zoom={13}
+                zoom={50}
                 style={{ height: '80%', width: '80%', borderRadius: '8px' }}
               >
                 <TileLayer
