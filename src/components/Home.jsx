@@ -236,8 +236,8 @@ const handleMap = ()=>{
       {
         label: 'Temp (°C)',
         data: weatherdata.hourly.temperature_2m,
-        borderColor: 'rgba(59, 130, 246, 1)',
-        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        borderColor: 'yellow',
+        backgroundColor: 'white',
         fill: true,
         tension: 0.4,
       },
@@ -250,12 +250,12 @@ const handleMap = ()=>{
     plugins: {
       legend: {
         position: 'top',
-        labels: { color: 'yellow', font: { size: 10 } },
+        labels: { color: 'white', font: { size: 10 } },
       },
       title: {
         display: true,
         text: 'Hourly Temp',
-        color: 'yellow',
+        color: 'white',
         font: { size: 12 },
       },
     },
