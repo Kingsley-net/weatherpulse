@@ -394,7 +394,7 @@ export function Home() {
       </div>
 
       {/* Footer - Mobile Bottom Navigation */}
-      <div className="col-span-2 fixed bottom-0 right-0 left-0 shadow-3xl backdrop-blur-lg rounded-t-xl h-auto flex bg-blue-200 justify-around items-center z-40">
+      <div className="col-span-2 fixed bottom-0 right-0 left-0 shadow-3xl backdrop-blur-lg rounded-t-xl h-auto flex bg-blue-400 justify-around items-center z-40">
         {navItems.map((nav) => (
           <button
             key={nav.id}
