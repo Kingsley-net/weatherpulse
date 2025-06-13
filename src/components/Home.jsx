@@ -205,7 +205,7 @@ export function Home() {
 
   // Chart Data: 4-hour intervals, blue/navy, reduced y-axis range
 // Chart Data: show 4-hour intervals on X axis, reduce Y axis range, blue/navy color
-const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_2m && weatherdata.hourly.time
+const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_ && weatherdata.hourly.time
   ? (() => {
       const points = [];
       const labels = [];
@@ -274,24 +274,27 @@ const chartOptions = {
   scales: {
     x: {
       grid: {
-        color: 'rgba(51, 65, 85, 0.2)',
-        drawBorder: false,
+        display: true, // Ensure grid lines are enabled
+        color: 'rgba(255, 255, 255, 0.3)', // Brighter for visibility
+        drawBorder: true,
       },
       ticks: {
+        display: true, // Ensure ticks are enabled
         color: '#fff',
-        font: { size: 14 },
-        maxTicksLimit: 6,
-        autoSkip: false,
+        font: { size: 12 }, // Slightly smaller to avoid overlap
+        maxTicksLimit: 8, // Allow more ticks if needed
+        autoSkip: true, // Auto-skip to prevent crowding
+        padding: 10, // Add space below ticks
       },
     },
     y: {
       grid: {
-        color: 'rgba(51, 65, 85, 0.2)',
-        drawBorder: false,
+        color: 'rgba(255, 255, 255, 0.3)',
+        drawBorder: true,
       },
       ticks: {
         color: '#fff',
-        font: { size: 13 },
+        font: { size: 12 },
         callback: (value) => `${value} °C`,
       },
       beginAtZero: false,
@@ -300,6 +303,7 @@ const chartOptions = {
     },
   },
 };
+
 
   // Helper: Safely get current weather from either API or fake data
   const getCurrentTemperature = () =>
@@ -429,15 +433,14 @@ const chartOptions = {
                 <p className="text-red-500 text-sm">No hourly forecast data</p>
               )}
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
-              <div className="w-full h-60 mt-2 bg-transparent">
-                {weatherdata?.hourly && chartData ? (
-                  <Line data={chartData} options={chartOptions} />
-                ) : (
-                  <p className="text-red-500 text-sm">No data for graph</p>
-                )}
-              </div>
+           <div className="w-full h-80 mt-2 bg-transparent">
+  {chartData && chartData.labels.length > 0 ? (
+    <Line data={chartData} options={chartOptions} />
+  ) : (
+    <p className="text-red-500 text-sm text-center">No valid data available for graph</p>
+  )}
+</div>
+ 
             </div>
           </div>
         )}
@@ -533,7 +536,7 @@ const chartOptions = {
 
       {/* Weather-like Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gradient-to-b from-blue-200/80 via-gray-300/80 to-white/80 z-50">
+        <div className="fixed inset-0 flex justify-center items-center bg-gradient-to-b from-blue-900/80 via-gray-950/80 backdrop-filter-xl to-white/80 z-50">
           <div className="flex flex-col items-center">
             <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-cloud-move">
               <ellipse cx="60" cy="55" rx="35" ry="18" fill="#dbeafe" />
