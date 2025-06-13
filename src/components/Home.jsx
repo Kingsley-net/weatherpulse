@@ -388,7 +388,7 @@ const chartData = weatherdata?.hourly && {
                   <p className="text-red-500 text-sm">No data for graph</p>
                 )}
               </div>
-            </div>
+            
 
             </div>
           </div>
