@@ -203,37 +203,49 @@ export function Home() {
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
 
-  // Chart Data: show all 24 hours, but x-label only every 3rd hour for clarity
+  // Chart Data: 4-hour intervals, blue/navy, reduced y-axis range
   const chartData =
     weatherdata?.hourly && weatherdata.hourly.temperature_2m
-      ? {
-          labels: weatherdata.hourly.time.map((time, idx) =>
-            idx % 3 === 0
-              ? new Date(time).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
-              : ""
-          ),
-          datasets: [
-            {
-              label: 'Temp (°C)',
-              data: weatherdata.hourly.temperature_2m.map(Number),
-              borderColor: '#38bdf8', // sky-400
-              backgroundColor: function(context) {
-                const chart = context.chart;
-                const {ctx, chartArea} = chart;
-                if (!chartArea) return null;
-                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                gradient.addColorStop(0, "rgba(56,189,248,0.5)");
-                gradient.addColorStop(1, "rgba(224,242,254,0.1)");
-                return gradient;
+      ? (() => {
+          const points = [];
+          const labels = [];
+          for (let i = 0; i < weatherdata.hourly.temperature_2m.length; i += 4) {
+            points.push(Number(weatherdata.hourly.temperature_2m[i]));
+            labels.push(
+              new Date(weatherdata.hourly.time[i]).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+            );
+          }
+          return {
+            labels,
+            datasets: [
+              {
+                label: 'Temperature (°C)',
+                data: points,
+                borderColor: "#334155", // navy blue
+                backgroundColor: function(context) {
+                  const chart = context.chart;
+                  const {ctx, chartArea} = chart;
+                  if (!chartArea) return null;
+                  const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                  gradient.addColorStop(0, "#38bdf8"); // blue
+                  gradient.addColorStop(1, "#334155"); // navy
+                  return gradient;
+                },
+                pointRadius: 3,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.4,
               },
-              pointRadius: 2,
-              pointHoverRadius: 5,
-              fill: true,
-              tension: 0.35,
-            },
-          ],
-        }
+            ],
+          };
+        })()
       : null;
+
+  const tempVals = weatherdata?.hourly?.temperature_2m
+    ? weatherdata.hourly.temperature_2m.map(Number)
+    : [];
+  const minY = Math.floor(Math.min(...tempVals, 0)) - 2;
+  const maxY = Math.ceil(Math.max(...tempVals, 0)) + 2;
 
   const chartOptions = {
     responsive: true,
@@ -251,21 +263,20 @@ export function Home() {
     },
     scales: {
       x: {
-        grid: { color: 'rgba(148,163,184,0.16)' },
+        grid: { color: 'rgba(51,65,85,0.12)' },
         ticks: {
           color: '#fff',
-          font: { size: 12 },
-          maxTicksLimit: 8,
+          font: { size: 14 },
+          maxTicksLimit: 6,
           autoSkip: false,
-          callback: function(val, idx) {
-            return this.getLabelForValue(val) || null;
-          }
-        }
+        },
       },
       y: {
-        grid: { color: 'rgba(148,163,184,0.16)' },
-        ticks: { color: '#fff', font: { size: 12 } },
+        grid: { color: 'rgba(51,65,85,0.14)' },
+        ticks: { color: '#fff', font: { size: 13 } },
         beginAtZero: false,
+        min: minY,
+        max: maxY,
       },
     },
   };
@@ -275,12 +286,10 @@ export function Home() {
     weatherdata?.current?.temperature_2m ??
     weatherdata?.current_weather?.temperature ??
     'N/A';
-
   const getCurrentWindDirection = () =>
     weatherdata?.current?.wind_direction_10m ??
     weatherdata?.current_weather?.winddirection ??
     'N/A';
-
   const getCurrentWindSpeed = () =>
     weatherdata?.current?.wind_speed_10m ??
     weatherdata?.current_weather?.windspeed ??
