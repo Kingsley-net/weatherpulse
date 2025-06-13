@@ -394,12 +394,12 @@ export function Home() {
       </div>
 
       {/* Footer - Mobile Bottom Navigation */}
-      <div className="col-span-2 fixed bottom-0 right-0 left-0 shadow-2xl backdrop-blur-lg rounded-t-xl h-auto flex justify-around items-center z-40">
+      <div className="col-span-2 fixed bottom-0 right-0 left-0 shadow-3xl backdrop-blur-lg rounded-t-xl h-auto flex justify-around items-center z-40">
         {navItems.map((nav) => (
           <button
             key={nav.id}
             onClick={() => setActive(nav.id)}
-            className={`flex flex-col items-center justify-center font-bold py-2 px-3 transition-all duration-200 ${
+            className={`flex flex-col text-white font-bold items-center justify-center font-bold py-2 px-3 transition-all duration-200 ${
               active === nav.id ? 'text-blue-600 font-bold scale-110 drop-shadow-lg' : 'opacity-80'
             }`}
           >
