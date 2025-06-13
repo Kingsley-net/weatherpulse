@@ -209,16 +209,15 @@ export function Home() {
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
 
-  // Chart Data: 4-hour intervals, blue/navy, reduced y-axis 
-  // Chart Data: show 4-hour intervals on X axis, reduce Y axis range, blue/navy color
+  // Chart Data: 24 hours, blue/navy colors
   const chartData = weatherdata?.hourly && {
-    labels: weatherdata.hourly.time.map((time) => formatTime(time)),
+    labels: weatherdata.hourly.time.slice(0, 24).map((time) => formatTime(time)),
     datasets: [
       {
         label: 'Temp (°C)',
-        data: weatherdata.hourly.temperature_2m,
-        borderColor: 'yellow',
-        backgroundColor: 'white',
+        data: weatherdata.hourly.temperature_2m.slice(0, 24),
+        borderColor: '#2563eb', // blue-600
+        backgroundColor: 'rgba(30, 58, 138, 0.35)', // navy blue with opacity
         fill: true,
         tension: 0.4,
       },
@@ -372,9 +371,9 @@ export function Home() {
               <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
               {weatherdata?.hourly ? (
                 <Times
-                  hourlyTimes={weatherdata.hourly.time}
-                  temperatures={weatherdata.hourly.temperature_2m}
-                  weatherCode={weatherdata.hourly.weather_code}
+                  hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
+                  temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
+                  weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
                 />
               ) : (
                 <p className="text-red-500 text-sm">No hourly forecast data</p>
@@ -484,7 +483,7 @@ export function Home() {
 
       {/* Weather-like Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gradient-to-b from-blue-900/80 via-gray-950/80 backdrop-filter-xl to-white/80 z-50">
+        <div className="fixed inset-0 flex justify-center items-center bg-blue-900/90 z-50">
           <div className="flex flex-col items-center">
             <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-cloud-move">
               <ellipse cx="60" cy="55" rx="35" ry="18" fill="#dbeafe" />
@@ -492,7 +491,7 @@ export function Home() {
               <ellipse cx="80" cy="45" rx="24" ry="16" fill="#a5b4fc" />
               <ellipse cx="70" cy="60" rx="32" ry="13" fill="#e0e7ff" />
             </svg>
-            <span className="mt-4 text-blue-900 text-2xl font-extrabold tracking-wide animate-pulse">Loading Weather...</span>
+            <span className="mt-4 text-blue-100 text-2xl font-extrabold tracking-wide animate-pulse">Loading Weather...</span>
           </div>
           <style>{`
             @keyframes cloud-move {
