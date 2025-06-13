@@ -215,7 +215,7 @@ const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_2m && we
           points.push(temp);
           labels.push(
             new Date(weatherdata.hourly.time[i]).toLocaleTimeString('en-US', {
-              hour: '2-digit', // Clearer 2-digit format (e.g., 12 AM, 04 AM)
+              hour: '2-digit', // Clear 2-digit format (e.g., 12 AM, 04 AM)
               hour12: true,
             })
           );
@@ -251,8 +251,8 @@ const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_2m && we
 const tempVals = weatherdata?.hourly?.temperature_2m
   ? weatherdata.hourly.temperature_2m.map(Number).filter((val) => !isNaN(val))
   : [];
-const minY = tempVals.length > 0 ? Math.floor(Math.min(...tempVals)) - 2 : 20; // Adjusted to fit your data range
-const maxY = tempVals.length > 0 ? Math.ceil(Math.max(...tempVals)) + 2 : 36; // Adjusted to fit your data range
+const minY = tempVals.length > 0 ? Math.floor(Math.min(...tempVals)) - 2 : 20; // Adjusted to fit data
+const maxY = tempVals.length > 0 ? Math.ceil(Math.max(...tempVals)) + 2 : 36; // Adjusted to fit data
 
 const chartOptions = {
   responsive: true,
@@ -281,11 +281,13 @@ const chartOptions = {
       ticks: {
         display: true,
         color: '#fff',
-        font: { size: 12 }, // Smaller font for readability
-        maxRotation: 0, // Prevent label rotation
+        font: { size: 12 },
+        maxTicksLimit: 6, // Limit to ~6 labels (covers 24 hours with 4-hour intervals)
+        autoSkip: true, // Skip labels to avoid overcrowding
+        maxRotation: 0,
         minRotation: 0,
-        padding: 5, // Less padding to fit height
-        callback: (value) => chartData?.labels[value] || '', // Ensure labels match data
+        padding: 5,
+        callback: (value) => chartData?.labels[value] || '', // Match labels to 4-hour intervals
       },
     },
     y: {
@@ -304,6 +306,10 @@ const chartOptions = {
     },
   },
 };
+
+
+
+      
 
 
   
