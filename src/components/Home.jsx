@@ -203,9 +203,9 @@ export function Home() {
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
 
-  // Chart Data: 4-hour intervals, blue/navy, reduced y-axis range
+  // Chart Data: 4-hour intervals, blue/navy, reduced y-axis 
 // Chart Data: show 4-hour intervals on X axis, reduce Y axis range, blue/navy color
-const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_ && weatherdata.hourly.time
+const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_2m && weatherdata.hourly.time
   ? (() => {
       const points = [];
       const labels = [];
@@ -215,7 +215,7 @@ const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_ && weat
           points.push(temp);
           labels.push(
             new Date(weatherdata.hourly.time[i]).toLocaleTimeString('en-US', {
-              hour: 'numeric',
+              hour: '2-digit', // Clearer 2-digit format (e.g., 12 AM, 04 AM)
               hour12: true,
             })
           );
@@ -251,8 +251,8 @@ const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_ && weat
 const tempVals = weatherdata?.hourly?.temperature_2m
   ? weatherdata.hourly.temperature_2m.map(Number).filter((val) => !isNaN(val))
   : [];
-const minY = tempVals.length > 0 ? Math.floor(Math.min(...tempVals)) - 2 : -10;
-const maxY = tempVals.length > 0 ? Math.ceil(Math.max(...tempVals)) + 2 : 30;
+const minY = tempVals.length > 0 ? Math.floor(Math.min(...tempVals)) - 2 : 20; // Adjusted to fit your data range
+const maxY = tempVals.length > 0 ? Math.ceil(Math.max(...tempVals)) + 2 : 36; // Adjusted to fit your data range
 
 const chartOptions = {
   responsive: true,
@@ -274,17 +274,18 @@ const chartOptions = {
   scales: {
     x: {
       grid: {
-        display: true, // Ensure grid lines are enabled
+        display: true,
         color: 'rgba(255, 255, 255, 0.3)', // Brighter for visibility
         drawBorder: true,
       },
       ticks: {
-        display: true, // Ensure ticks are enabled
+        display: true,
         color: '#fff',
-        font: { size: 12 }, // Slightly smaller to avoid overlap
-        maxTicksLimit: 8, // Allow more ticks if needed
-        autoSkip: true, // Auto-skip to prevent crowding
-        padding: 10, // Add space below ticks
+        font: { size: 12 }, // Smaller font for readability
+        maxRotation: 0, // Prevent label rotation
+        minRotation: 0,
+        padding: 5, // Less padding to fit height
+        callback: (value) => chartData?.labels[value] || '', // Ensure labels match data
       },
     },
     y: {
@@ -295,7 +296,7 @@ const chartOptions = {
       ticks: {
         color: '#fff',
         font: { size: 12 },
-        callback: (value) => `${value} °C`,
+        callback: (value) => `${value}°C`,
       },
       beginAtZero: false,
       min: minY,
@@ -305,6 +306,7 @@ const chartOptions = {
 };
 
 
+  
   // Helper: Safely get current weather from either API or fake data
   const getCurrentTemperature = () =>
     weatherdata?.current?.temperature_2m ??
@@ -433,14 +435,15 @@ const chartOptions = {
                 <p className="text-red-500 text-sm">No hourly forecast data</p>
               )}
             </div>
-           <div className="w-full h-80 mt-2 bg-transparent">
+           <div className="w-full h-48 mt-2 bg-transparent"> {/* Reduced to h-48 (~12rem, ~192px) for one-page app */}
   {chartData && chartData.labels.length > 0 ? (
     <Line data={chartData} options={chartOptions} />
   ) : (
     <p className="text-red-500 text-sm text-center">No valid data available for graph</p>
   )}
 </div>
- 
+
+
             </div>
           </div>
         )}
