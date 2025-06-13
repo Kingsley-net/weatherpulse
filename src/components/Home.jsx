@@ -205,110 +205,48 @@ export function Home() {
 
   // Chart Data: 4-hour intervals, blue/navy, reduced y-axis 
 // Chart Data: show 4-hour intervals on X axis, reduce Y axis range, blue/navy color
-const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_2m && weatherdata.hourly.time
-  ? (() => {
-      const points = [];
-      const labels = [];
-      for (let i = 0; i < weatherdata.hourly.temperature_2m.length && i < weatherdata.hourly.time.length; i += 4) {
-        const temp = Number(weatherdata.hourly.temperature_2m[i]);
-        if (!isNaN(temp)) {
-          points.push(temp);
-          labels.push(
-            new Date(weatherdata.hourly.time[i]).toLocaleTimeString('en-US', {
-              hour: '2-digit', // Clear 2-digit format (e.g., 12 AM, 04 AM)
-              hour12: true,
-            })
-          );
-        }
-      }
-      return {
-        labels,
-        datasets: [
-          {
-            label: 'Temperature (°C)',
-            data: points,
-            borderColor: '#334155', // navy blue
-            backgroundColor: (context) => {
-              const chart = context.chart;
-              const { ctx, chartArea } = chart;
-              if (!chartArea) return 'rgba(56, 189, 248, 0.2)'; // fallback
-              const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-              gradient.addColorStop(0, 'rgba(56, 189, 248, 0.4)'); // blue
-              gradient.addColorStop(1, 'rgba(51, 65, 85, 0.2)'); // navy blue
-              return gradient;
-            },
-            pointRadius: 3,
-            pointHoverRadius: 6,
-            fill: true,
-            tension: 0.4,
-          },
-        ],
-      };
-    })()
-  : null;
-
-// Compute min/max for visible Y axis
-const tempVals = weatherdata?.hourly?.temperature_2m
-  ? weatherdata.hourly.temperature_2m.map(Number).filter((val) => !isNaN(val))
-  : [];
-const minY = tempVals.length > 0 ? Math.floor(Math.min(...tempVals)) - 2 : 20; // Adjusted to fit data
-const maxY = tempVals.length > 0 ? Math.ceil(Math.max(...tempVals)) + 2 : 36; // Adjusted to fit data
-
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: false,
-    },
-    tooltip: {
-      enabled: true,
-      backgroundColor: '#334155',
-      titleColor: '#38bdf8',
-      bodyColor: '#fff',
-      callbacks: {
-        label: (context) => `${context.parsed.y.toFixed(1)} °C`,
+const chartData = weatherdata?.hourly && {
+    labels: weatherdata.hourly.time.map((time) => formatTime(time)),
+    datasets: [
+      {
+        label: 'Temp (°C)',
+        data: weatherdata.hourly.temperature_2m,
+        borderColor: 'yellow',
+        backgroundColor: 'white',
+        fill: true,
+        tension: 0.4,
       },
-    },
-  },
-  scales: {
-    x: {
-      grid: {
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: { color: 'white', font: { size: 10 } },
+      },
+      title: {
         display: true,
-        color: 'rgba(255, 255, 255, 0.3)', // Brighter for visibility
-        drawBorder: true,
-      },
-      ticks: {
-        display: true,
-        color: '#fff',
+        text: 'Hourly Temp',
+        color: 'white',
         font: { size: 12 },
-        maxTicksLimit: 6, // Limit to ~6 labels (covers 24 hours with 4-hour intervals)
-        autoSkip: true, // Skip labels to avoid overcrowding
-        maxRotation: 0,
-        minRotation: 0,
-        padding: 5,
-        callback: (value) => chartData?.labels[value] || '', // Match labels to 4-hour intervals
       },
     },
-    y: {
-      grid: {
-        color: 'rgba(255, 255, 255, 0.3)',
-        drawBorder: true,
+    scales: {
+      x: {
+        title: { display: false },
+        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } },
       },
-      ticks: {
-        color: '#fff',
-        font: { size: 12 },
-        callback: (value) => `${value}°C`,
+      y: {
+        title: { display: false },
+        ticks: { color: 'white', font: { size: 10 } },
       },
-      beginAtZero: false,
-      min: minY,
-      max: maxY,
     },
-  },
-};
-
-
-
+  };
+  
+    
       
 
 
@@ -441,14 +379,16 @@ const chartOptions = {
                 <p className="text-red-500 text-sm">No hourly forecast data</p>
               )}
             </div>
-           <div className="w-full h-48 mt-2 bg-transparent"> {/* Reduced to h-48 (~12rem, ~192px) for one-page app */}
-  {chartData && chartData.labels.length > 0 ? (
-    <Line data={chartData} options={chartOptions} />
-  ) : (
-    <p className="text-red-500 text-sm text-center">No valid data available for graph</p>
-  )}
-</div>
-
+           <div>
+              <h1 className="text-xl font-bold">Forecast Graph</h1>
+              <div className="w-full h-40 mt-2">
+                {weatherdata?.hourly && chartData ? (
+                  <Line data={chartData} options={chartOptions} />
+                ) : (
+                  <p className="text-red-500 text-sm">No data for graph</p>
+                )}
+              </div>
+            </div>
 
             </div>
           </div>
