@@ -1,15 +1,8 @@
 import {
-  Bell,
-  User,
-  LayoutGrid,
-  MapPinnedIcon,
-  Star,
-  Settings,
-  Power,
   Search,
   House,
   MapPin,
-  X,
+  X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Times from './time';
@@ -51,12 +44,8 @@ ChartJS.register(
 export function Home() {
   const [isHovering, setIsHovering] = useState(false);
   const [isHovering2, setIsHovering2] = useState(false);
-  const [isHovering3, setIsHovering3] = useState(false);
-  const [isHovering4, setIsHovering4] = useState(false);
   const [isHovering5, setIsHovering5] = useState(false);
-  const [isHovering6, setIsHovering6] = useState(false);
   const [isHovering7, setIsHovering7] = useState(false);
-  const [isOpen, setIsOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [weatherdata, setWeatherData] = useState(null);
@@ -166,9 +155,7 @@ export function Home() {
     getUserLocation();
   }, []);
 
-  const handleMap = () => {
-    setActive('Home');
-  };
+  const handleMap = () => setActive('Home');
 
   // Handle city search
   const handleSearch = async (e) => {
@@ -216,84 +203,71 @@ export function Home() {
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
 
-  // Chart Data and Options (clean, realistic, not jam-packed, and visually fitting)
-  
-const chartData = weatherdata?.hourly && {
-    labels: weatherdata.hourly.time.map((time) => formatTime(time)),
-    datasets: [
-      {
-        label: 'Temp (°C)',
-        data: weatherdata.hourly.temperature_2m,
-        borderColor: 'yellow',
-        backgroundColor: 'white',
-        fill: true,
-        tension: 0.4,
-      },
-    ],
-  };
+  // Chart Data: show all 24 hours, but x-label only every 3rd hour for clarity
+  const chartData =
+    weatherdata?.hourly && weatherdata.hourly.temperature_2m
+      ? {
+          labels: weatherdata.hourly.time.map((time, idx) =>
+            idx % 3 === 0
+              ? new Date(time).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+              : ""
+          ),
+          datasets: [
+            {
+              label: 'Temp (°C)',
+              data: weatherdata.hourly.temperature_2m.map(Number),
+              borderColor: '#38bdf8', // sky-400
+              backgroundColor: function(context) {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) return null;
+                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                gradient.addColorStop(0, "rgba(56,189,248,0.5)");
+                gradient.addColorStop(1, "rgba(224,242,254,0.1)");
+                return gradient;
+              },
+              pointRadius: 2,
+              pointHoverRadius: 5,
+              fill: true,
+              tension: 0.35,
+            },
+          ],
+        }
+      : null;
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
-        labels: { color: 'white', font: { size: 10 } },
+        display: false,
       },
-      title: {
-        display: true,
-        text: 'Hourly Temp',
-        color: 'white',
-        font: { size: 12 },
+      tooltip: {
+        enabled: true,
+        backgroundColor: '#334155',
+        titleColor: '#38bdf8',
+        bodyColor: '#fff',
       },
     },
     scales: {
       x: {
-        title: { display: false },
-        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } },
+        grid: { color: 'rgba(148,163,184,0.16)' },
+        ticks: {
+          color: '#fff',
+          font: { size: 12 },
+          maxTicksLimit: 8,
+          autoSkip: false,
+          callback: function(val, idx) {
+            return this.getLabelForValue(val) || null;
+          }
+        }
       },
       y: {
-        title: { display: false },
-        ticks: { color: 'white', font: { size: 10 } },
+        grid: { color: 'rgba(148,163,184,0.16)' },
+        ticks: { color: '#fff', font: { size: 12 } },
+        beginAtZero: false,
       },
     },
-  };
-
-
-  const formatTime = (isoTime) => {
-    try {
-      return new Date(isoTime).toLocaleString('en-US', {
-        timeZone: 'America/New_York',
-        hour: 'numeric',
-        hour12: true,
-      });
-    } catch (e) {
-      return 'N/A';
-    }
-  };
-
-  const handleNavigation = (id) => setActive(id);
-  const handleHovering1 = () => setIsHovering(true);
-  const handleHoveringOut1 = () => setIsHovering(false);
-  const handleHovering2 = () => setIsHovering2(true);
-  const handleHoveringOut2 = () => setIsHovering2(false);
-  const handleHovering3 = () => setIsHovering3(true);
-  const handleHoveringOut3 = () => setIsHovering3(false);
-  const handleHovering4 = () => setIsHovering4(true);
-  const handleHoveringOut4 = () => setIsHovering4(false);
-  const handleHovering5 = () => setIsHovering5(true);
-  const handleHoveringOut5 = () => setIsHovering5(false);
-  const handleHovering6 = () => setIsHovering6(true);
-  const handleHoveringOut6 = () => setIsHovering6(false);
-  const handleHovering7 = () => setIsHovering7(true);
-  const handleHoveringOut7 = () => setIsHovering7(false);
-  const searching = (e) => {
-    e.preventDefault();
-    setActiveSearch(true);
-  };
-  const handleCancel = () => {
-    setActiveSearch(false);
-    setSearchQuery('');
   };
 
   // Helper: Safely get current weather from either API or fake data
@@ -311,6 +285,25 @@ const chartData = weatherdata?.hourly && {
     weatherdata?.current?.wind_speed_10m ??
     weatherdata?.current_weather?.windspeed ??
     'N/A';
+
+  // UI logic for hover
+  const handleHovering1 = () => setIsHovering(true);
+  const handleHoveringOut1 = () => setIsHovering(false);
+  const handleHovering2 = () => setIsHovering2(true);
+  const handleHoveringOut2 = () => setIsHovering2(false);
+  const handleHovering5 = () => setIsHovering5(true);
+  const handleHoveringOut5 = () => setIsHovering5(false);
+  const handleHovering7 = () => setIsHovering7(true);
+  const handleHoveringOut7 = () => setIsHovering7(false);
+
+  const searching = (e) => {
+    e.preventDefault();
+    setActiveSearch(true);
+  };
+  const handleCancel = () => {
+    setActiveSearch(false);
+    setSearchQuery('');
+  };
 
   return (
     <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden fixed">
@@ -409,7 +402,7 @@ const chartData = weatherdata?.hourly && {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
-              <div className="w-full h-40 mt-2 bg-transparent">
+              <div className="w-full h-60 mt-2 bg-transparent">
                 {weatherdata?.hourly && chartData ? (
                   <Line data={chartData} options={chartOptions} />
                 ) : (
@@ -454,7 +447,7 @@ const chartData = weatherdata?.hourly && {
           {coordinates ? (
             <MapContainer
               center={[coordinates.latitude, coordinates.longitude]}
-              zoom={13}
+              zoom={50}
               style={{ height: '80%', width: '80%', borderRadius: '8px' }}
             >
               <TileLayer
