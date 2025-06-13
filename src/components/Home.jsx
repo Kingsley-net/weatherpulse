@@ -394,7 +394,7 @@ export function Home() {
       </div>
 
       {/* Footer - Mobile Bottom Navigation */}
-      <div className="col-span-2 fixed bottom-0 right-0 left-0 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-700 shadow-2xl backdrop-blur-lg rounded-t-xl h-auto flex justify-around items-center z-40">
+      <div className="col-span-2 fixed bottom-0 right-0 left-0 bg-gradient-to-r from-sky-200 via-blue-300 to-indigo-500 shadow-2xl backdrop-blur-lg rounded-t-xl h-auto flex justify-around items-center z-40">
         {navItems.map((nav) => (
           <button
             key={nav.id}
@@ -483,7 +483,7 @@ export function Home() {
 
       {/* Weather-like Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 flex justify-center items-center bg-blue-900/90 z-50">
+        <div className="fixed inset-0 flex justify-center items-center bg-blue-900/50 backdrop-blur-xl z-50">
           <div className="flex flex-col items-center">
             <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-cloud-move">
               <ellipse cx="60" cy="55" rx="35" ry="18" fill="#dbeafe" />
