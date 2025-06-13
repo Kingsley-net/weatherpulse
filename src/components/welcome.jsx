@@ -6,7 +6,7 @@ export function Welcome(){
     const navigate = useNavigate()
 return(
     <>
-    <div className='h-screen w-full overflow-hidden bg-gray-200'>
+    <div className='h-screen w-full overflow-hidden bg-transparent backdrop-blur-3xl'>
 
 <div className='flex flex-col justify-center items-center h-full w-full'>
     <h1 className='font-bold text-4xl'>WeatherPulse</h1>
