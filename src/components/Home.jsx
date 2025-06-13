@@ -426,7 +426,7 @@ export function Home() {
           {coordinates ? (
             <MapContainer
               center={[coordinates.latitude, coordinates.longitude]}
-              zoom={50}
+              zoom={13}
               style={{ height: '80%', width: '80%', borderRadius: '8px' }}
             >
               <TileLayer
