@@ -41,6 +41,12 @@ ChartJS.register(
   Legend
 );
 
+// Helper: Format ISO time string to 'HH:00'
+const formatTime = (time) => {
+  const date = new Date(time);
+  return date.getHours().toString().padStart(2, '0') + ':00';
+};
+
 export function Home() {
   const [isHovering, setIsHovering] = useState(false);
   const [isHovering2, setIsHovering2] = useState(false);
@@ -99,7 +105,7 @@ export function Home() {
 
           try {
             const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_hours&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_hours,uv_index_max,weather_code&hourly=temperature_2m,weather_code&current_weather=true&timezone=auto`
             );
             if (!weatherResponse.ok) throw new Error('Weather API failed');
             const weatherData = await weatherResponse.json();
@@ -180,7 +186,7 @@ export function Home() {
       setActiveSearch(false);
 
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_hours&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_hours,uv_index_max,weather_code&hourly=temperature_2m,weather_code&current_weather=true&timezone=auto`
       );
       if (!weatherResponse.ok) throw new Error('Weather API failed');
       const weatherData = await weatherResponse.json();
@@ -204,8 +210,8 @@ export function Home() {
   const year = date.getFullYear();
 
   // Chart Data: 4-hour intervals, blue/navy, reduced y-axis 
-// Chart Data: show 4-hour intervals on X axis, reduce Y axis range, blue/navy color
-const chartData = weatherdata?.hourly && {
+  // Chart Data: show 4-hour intervals on X axis, reduce Y axis range, blue/navy color
+  const chartData = weatherdata?.hourly && {
     labels: weatherdata.hourly.time.map((time) => formatTime(time)),
     datasets: [
       {
@@ -245,12 +251,7 @@ const chartData = weatherdata?.hourly && {
       },
     },
   };
-  
-    
-      
 
-
-  
   // Helper: Safely get current weather from either API or fake data
   const getCurrentTemperature = () =>
     weatherdata?.current?.temperature_2m ??
@@ -379,7 +380,7 @@ const chartData = weatherdata?.hourly && {
                 <p className="text-red-500 text-sm">No hourly forecast data</p>
               )}
             </div>
-           <div>
+            <div>
               <h1 className="text-xl font-bold">Forecast Graph</h1>
               <div className="w-full h-40 mt-2">
                 {weatherdata?.hourly && chartData ? (
@@ -388,15 +389,13 @@ const chartData = weatherdata?.hourly && {
                   <p className="text-red-500 text-sm">No data for graph</p>
                 )}
               </div>
-            
-
             </div>
           </div>
         )}
       </div>
 
       {/* Footer - Mobile Bottom Navigation */}
-      <div className="col-span-2 fixed bottom-0 right-0 left-0 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-700 shadow-2xl backdrop-blur-lg rounded-t-xl h-auto flex justify-around items-center w-full text-white md:hidden">
+      <div className="col-span-2 fixed bottom-0 right-0 left-0 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-700 shadow-2xl backdrop-blur-lg rounded-t-xl h-auto flex justify-around items-center z-40">
         {navItems.map((nav) => (
           <button
             key={nav.id}
