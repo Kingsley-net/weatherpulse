@@ -204,82 +204,102 @@ export function Home() {
   const year = date.getFullYear();
 
   // Chart Data: 4-hour intervals, blue/navy, reduced y-axis range
-  const chartData =
-    weatherdata?.hourly && weatherdata.hourly.temperature_2m
-      ? (() => {
-          const points = [];
-          const labels = [];
-          for (let i = 0; i < weatherdata.hourly.temperature_2m.length; i += 4) {
-            points.push(Number(weatherdata.hourly.temperature_2m[i]));
-            labels.push(
-              new Date(weatherdata.hourly.time[i]).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
-            );
-          }
-          return {
-            labels,
-            datasets: [
-              {
-                label: 'Temperature (°C)',
-                data: points,
-                borderColor: "#334155", // navy blue
-                backgroundColor: function(context) {
-                  const chart = context.chart;
-                  const {ctx, chartArea} = chart;
-                  if (!chartArea) return null;
-                  const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                  gradient.addColorStop(0, "#38bdf8"); // blue
-                  gradient.addColorStop(1, "#334155"); // navy
-                  return gradient;
-                },
-                pointRadius: 3,
-                pointHoverRadius: 6,
-                fill: true,
-                tension: 0.4,
-              },
-            ],
-          };
-        })()
-      : null;
+// Chart Data: show 4-hour intervals on X axis, reduce Y axis range, blue/navy color
+const chartData = weatherdata?.hourly && weatherdata.hourly.temperature_2m && weatherdata.hourly.time
+  ? (() => {
+      const points = [];
+      const labels = [];
+      for (let i = 0; i < weatherdata.hourly.temperature_2m.length && i < weatherdata.hourly.time.length; i += 4) {
+        const temp = Number(weatherdata.hourly.temperature_2m[i]);
+        if (!isNaN(temp)) {
+          points.push(temp);
+          labels.push(
+            new Date(weatherdata.hourly.time[i]).toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              hour12: true,
+            })
+          );
+        }
+      }
+      return {
+        labels,
+        datasets: [
+          {
+            label: 'Temperature (°C)',
+            data: points,
+            borderColor: '#334155', // navy blue
+            backgroundColor: (context) => {
+              const chart = context.chart;
+              const { ctx, chartArea } = chart;
+              if (!chartArea) return 'rgba(56, 189, 248, 0.2)'; // fallback
+              const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+              gradient.addColorStop(0, 'rgba(56, 189, 248, 0.4)'); // blue
+              gradient.addColorStop(1, 'rgba(51, 65, 85, 0.2)'); // navy blue
+              return gradient;
+            },
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            fill: true,
+            tension: 0.4,
+          },
+        ],
+      };
+    })()
+  : null;
 
-  const tempVals = weatherdata?.hourly?.temperature_2m
-    ? weatherdata.hourly.temperature_2m.map(Number)
-    : [];
-  const minY = Math.floor(Math.min(...tempVals, 0)) - 2;
-  const maxY = Math.ceil(Math.max(...tempVals, 0)) + 2;
+// Compute min/max for visible Y axis
+const tempVals = weatherdata?.hourly?.temperature_2m
+  ? weatherdata.hourly.temperature_2m.map(Number).filter((val) => !isNaN(val))
+  : [];
+const minY = tempVals.length > 0 ? Math.floor(Math.min(...tempVals)) - 2 : -10;
+const maxY = tempVals.length > 0 ? Math.ceil(Math.max(...tempVals)) + 2 : 30;
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        enabled: true,
-        backgroundColor: '#334155',
-        titleColor: '#38bdf8',
-        bodyColor: '#fff',
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      enabled: true,
+      backgroundColor: '#334155',
+      titleColor: '#38bdf8',
+      bodyColor: '#fff',
+      callbacks: {
+        label: (context) => `${context.parsed.y.toFixed(1)} °C`,
       },
     },
-    scales: {
-      x: {
-        grid: { color: 'rgba(51,65,85,0.12)' },
-        ticks: {
-          color: '#fff',
-          font: { size: 14 },
-          maxTicksLimit: 6,
-          autoSkip: false,
-        },
+  },
+  scales: {
+    x: {
+      grid: {
+        color: 'rgba(51, 65, 85, 0.2)',
+        drawBorder: false,
       },
-      y: {
-        grid: { color: 'rgba(51,65,85,0.14)' },
-        ticks: { color: '#fff', font: { size: 13 } },
-        beginAtZero: false,
-        min: minY,
-        max: maxY,
+      ticks: {
+        color: '#fff',
+        font: { size: 14 },
+        maxTicksLimit: 6,
+        autoSkip: false,
       },
     },
-  };
+    y: {
+      grid: {
+        color: 'rgba(51, 65, 85, 0.2)',
+        drawBorder: false,
+      },
+      ticks: {
+        color: '#fff',
+        font: { size: 13 },
+        callback: (value) => `${value} °C`,
+      },
+      beginAtZero: false,
+      min: minY,
+      max: maxY,
+    },
+  },
+};
 
   // Helper: Safely get current weather from either API or fake data
   const getCurrentTemperature = () =>
