@@ -217,75 +217,48 @@ export function Home() {
   const year = date.getFullYear();
 
   // Chart Data and Options (clean, realistic, not jam-packed, and visually fitting)
-  const chartData =
-    weatherdata?.hourly && weatherdata.hourly.temperature_2m
-      ? {
-          labels: weatherdata.hourly.time.map((time, idx) =>
-            [0, 4, 8, 12, 16, 20].includes(idx)
-              ? new Date(time).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
-              : ""
-          ),
-          datasets: [
-            {
-              label: 'Temperature (°C)',
-              data: weatherdata.hourly.temperature_2m.map((t) => Number(t)),
-              borderColor: '#38bdf8', // sky-400
-              backgroundColor: function(context) {
-                const chart = context.chart;
-                const {ctx, chartArea} = chart;
-                if (!chartArea) {
-                  return null;
-                }
-                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                gradient.addColorStop(0, "rgba(56,189,248,0.5)");
-                gradient.addColorStop(1, "rgba(224,242,254,0.1)");
-                return gradient;
-              },
-              pointRadius: 0,
-              fill: true,
-              tension: 0.4,
-            },
-          ],
-        }
-      : null;
+  
+const chartData = weatherdata?.hourly && {
+    labels: weatherdata.hourly.time.map((time) => formatTime(time)),
+    datasets: [
+      {
+        label: 'Temp (°C)',
+        data: weatherdata.hourly.temperature_2m,
+        borderColor: 'yellow',
+        backgroundColor: 'white',
+        fill: true,
+        tension: 0.4,
+      },
+    ],
+  };
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false,
+        position: 'top',
+        labels: { color: 'white', font: { size: 10 } },
       },
       title: {
-        display: false,
-      },
-      tooltip: {
-        enabled: true,
-        backgroundColor: '#334155',
-        titleColor: '#38bdf8',
-        bodyColor: '#fff',
+        display: true,
+        text: 'Hourly Temp',
+        color: 'white',
+        font: { size: 12 },
       },
     },
     scales: {
       x: {
-        grid: { color: 'rgba(148,163,184,0.14)' },
-        ticks: {
-          color: '#fff',
-          font: { size: 12 },
-          callback: function(value, index, ticks) {
-            return this.getLabelForValue(value) || null;
-          },
-          maxTicksLimit: 6,
-          autoSkip: false,
-        },
+        title: { display: false },
+        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } },
       },
       y: {
-        grid: { color: 'rgba(148,163,184,0.16)' },
-        ticks: { color: '#fff', font: { size: 12 } },
-        beginAtZero: false,
+        title: { display: false },
+        ticks: { color: 'white', font: { size: 10 } },
       },
     },
   };
+
 
   const formatTime = (isoTime) => {
     try {
