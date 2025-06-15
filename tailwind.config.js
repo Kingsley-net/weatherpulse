@@ -7,10 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // Define your custom background image here
+      // Ensure 'custom-bg' is defined here if it's a Tailwind class for a background image.
+      // If 'custom-bg' is defined in a global CSS file, you can remove this section.
       backgroundImage: {
-        'custom-bg': "url('/your-background-image.jpg')", // Replace with the actual path to your image
-        // Example if it was a gradient: 'custom-bg': 'linear-gradient(to bottom right, #4a00e0, #8e2de2)',
+        'custom-bg': "url('/path/to/your/background-image.jpg')", // REMEMBER TO REPLACE THIS PATH
       },
       // Define custom box-shadow for glass elements
       boxShadow: {
