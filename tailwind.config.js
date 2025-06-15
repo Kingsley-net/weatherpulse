@@ -9,9 +9,7 @@ module.exports = {
     extend: {
       // Ensure 'custom-bg' is defined here if it's a Tailwind class for a background image.
       // If 'custom-bg' is defined in a global CSS file, you can remove this section.
-      backgroundImage: {
-        'custom-bg': "url('/path/to/your/background-image.jpg')", // REMEMBER TO REPLACE THIS PATH
-      },
+      
       // Define custom box-shadow for glass elements
       boxShadow: {
         'glass-inner': 'inset 0 4px 20px rgba(255, 255, 255, 0.3)', // Inner light reflection for depth
