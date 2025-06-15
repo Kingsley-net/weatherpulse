@@ -57,7 +57,7 @@ export function Home() {
   const [error, setError] = useState('');
   const [weatherdata, setWeatherData] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
-  const [cityData, setCityData] = useState(null);
+  const [cityData, setCityData] = null);
   const [countryData, setCountryData] = useState(null);
   const [active, setActive] = useState('Home');
   const [activeSearch, setActiveSearch] = useState(false);
@@ -94,7 +94,6 @@ export function Home() {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          // Basic validation for coordinates
           if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
             setError('Invalid location coordinates.');
             setWeatherData(fakeData);
@@ -118,16 +117,14 @@ export function Home() {
             let cityResponse;
             try {
               cityResponse = await fetch(cityUrl, {
-                // !!! IMPORTANT: CHANGE THIS TO YOUR ACTUAL EMAIL OR A UNIQUE APP IDENTIFIER !!!
-                headers: { 'User-Agent': 'WeatherPulseApp/1.0 (your-email@example.com)' },
+                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' }, // IMPORTANT: Provide a unique User-Agent
               });
               if (!cityResponse.ok) throw new Error('City lookup API failed.');
             } catch (e) {
-              // Retry once for Nominatim due to potential rate limits
+              // Retry once for Nominatim due to rate limits
               await new Promise((resolve) => setTimeout(resolve, 1000));
               cityResponse = await fetch(cityUrl, {
-                // !!! IMPORTANT: CHANGE THIS TO YOUR ACTUAL EMAIL OR A UNIQUE APP IDENTIFIER !!!
-                headers: { 'User-Agent': 'WeatherPulseApp/1.0 (your-email@example.com)' },
+                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
               });
               if (!cityResponse.ok) throw new Error('City lookup API failed on retry.');
             }
@@ -174,16 +171,12 @@ export function Home() {
   // Handle city search
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchQuery) {
-        setError('Please enter a city or postal code.');
-        return;
-    }
-    setError(''); // Clear previous errors on new search attempt
+    if (!searchQuery) return; // Don't search if query is empty
     try {
       // Use Nominatim for forward geocoding
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
-        { headers: { 'User-Agent': 'WeatherPulseApp/1.0 (your-email@example.com)' } } // !!! IMPORTANT: CHANGE THIS !!!
+        { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } } // IMPORTANT: Provide a unique User-Agent
       );
       if (!response.ok) throw new Error('City search failed.');
       const data = await response.json();
@@ -225,7 +218,7 @@ export function Home() {
   ];
 
   // Current Date display
-  const date = new Date(); // Current time is Friday, June 13, 2025 at 8:37:56 PM WAT.
+  const date = new Date();
   const day = date.getDate();
   const dayOfWeek = date.toLocaleString('en-US', { weekday: 'short' });
   const month = date.toLocaleString('en-US', { month: 'long' });
@@ -295,7 +288,7 @@ export function Home() {
   const handleHovering5 = () => setIsHovering5(true);
   const handleHoveringOut5 = () => setIsHovering5(false);
   const handleHovering7 = () => setIsHovering7(true);
-  const handleHoveringOut7 = () => setIsHoveringOut7(false); // Fix: ensure handleHoveringOut7 is used
+  const handleHoveringOut7 = () => setIsHovering7(false);
 
   // Function to open search overlay
   const searching = (e) => {
@@ -306,12 +299,13 @@ export function Home() {
   const handleCancel = () => {
     setActiveSearch(false);
     setSearchQuery('');
-    setError(''); // Clear any search-related errors
+    setError(''); // Clear search-related errors
   };
 
   return (
-    // Main container with responsive grid layout and gradient background
-    <div className="h-full w-full bg-gradient-to-br from-purple-600 to-blue-800 p-2 box-border fixed
+    // Main container: `custom-bg` remains for the background.
+    // Grid layout for responsiveness.
+    <div className="h-full w-full custom-bg p-2 box-border fixed 
                     grid grid-rows-[auto_1fr_auto] /* Mobile: Header, Main Content, Footer */
                     md:grid-rows-1 /* Desktop: Single row for sidebar & main */
                     md:grid-cols-[auto_1fr] /* Desktop: Sidebar takes auto width, Main takes rest */
@@ -325,42 +319,43 @@ export function Home() {
           onMouseOver={handleHovering1}
           onMouseOut={handleHoveringOut1}
           onClick={() => setActive('Home')}
-          className="mb-4 w-6 h-6 hover:scale-125 transition-transform hover:text-blue-400 cursor-pointer relative z-10"
+          className="mb-4 w-6 h-6 hover:scale-125 transition-transform hover:text-blue-400 cursor-pointer"
         />
         {isHovering && (
-          <p className="absolute left-full ml-2 bg-gray-800/90 px-1.5 py-0.5 rounded text-xs shadow-md z-20">Home</p>
+          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Home</p>
         )}
         <MapPin
           onMouseOver={handleHovering2}
           onMouseOut={handleHoveringOut2}
           onClick={() => setActive('Map')}
-          className="mb-4 w-6 h-6 hover:scale-125 transition-transform hover:text-blue-400 cursor-pointer relative z-10"
+          className="mb-4 w-6 h-6 hover:scale-125 transition-transform hover:text-blue-400 cursor-pointer"
         />
         {isHovering2 && (
-          <p className="absolute left-full ml-2 bg-gray-800/90 px-1.5 py-0.5 rounded text-xs shadow-md z-20">Map</p>
+          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Map</p>
         )}
         <GitGraphIcon
           onMouseOver={handleHovering5}
           onMouseOut={handleHoveringOut5}
           onClick={() => setActive('Predict')}
-          className="mb-4 w-6 h-6 hover:scale-125 transition-transform hover:text-blue-400 cursor-pointer relative z-10"
+          className="mb-4 w-6 h-6 hover:scale-125 transition-transform hover:text-blue-400 cursor-pointer"
         />
         {isHovering5 && (
-          <p className="absolute left-full ml-2 bg-gray-800/90 px-1.5 py-0.5 rounded text-xs shadow-md z-20">Predict</p>
+          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Predict</p>
         )}
         <Search
           onMouseOver={handleHovering7}
           onMouseOut={handleHoveringOut7}
           onClick={searching}
-          className="w-6 h-6 hover:scale-125 transition-transform hover:text-red-400 mt-auto cursor-pointer relative z-10"
+          className="w-6 h-6 hover:scale-125 transition-transform hover:text-red-400 mt-auto cursor-pointer"
         />
         {isHovering7 && (
-          <p className="absolute left-full ml-2 bg-gray-800/90 px-1.5 py-0.5 rounded text-xs shadow-md z-20">Search</p>
+          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Search</p>
         )}
       </div>
 
       {/* Main Content Area: Contains Header/Weather Info Card and Home/Map/Predict views */}
-      <div className="flex flex-col h-full overflow-y-auto gap-2">
+      {/* Added `pb-20` (padding-bottom) to prevent interception by the fixed bottom nav on mobile */}
+      <div className="flex flex-col h-full overflow-y-auto gap-2 pb-20 md:pb-0"> 
         {/* Header/Weather Info Card */}
         <div className="liquid-glass-element p-4 flex flex-col justify-between flex-shrink-0">
           <div className="liquid-glass-shine-overlay"></div> {/* Liquid glass shine effect */}
@@ -445,22 +440,21 @@ export function Home() {
             className={`relative flex flex-col font-bold items-center justify-center py-2 px-3 transition-all duration-200
               ${active === nav.id ? 'text-blue-600 scale-110 drop-shadow-lg' : 'text-white opacity-80'}`}
           >
-            <p className="relative z-10">{nav.icons}</p> {/* Ensure icon is above shine */}
-            <p className="text-xs mt-1 relative z-10">{nav.label}</p> {/* Ensure label is above shine */}
+            <p>{nav.icons}</p>
+            <p className="text-xs mt-1">{nav.label}</p>
           </button>
         ))}
         <button
           onClick={searching}
           className="relative flex flex-col items-center justify-center font-bold py-2 px-3 transition-all duration-200 text-white opacity-80 focus:text-yellow-300"
         >
-          <Search className="relative z-10" /> {/* Ensure icon is above shine */}
-          <p className="text-xs mt-1 relative z-10">Search</p> {/* Ensure label is above shine */}
+          <Search />
+          <p className="text-xs mt-1">Search</p>
         </button>
       </div>
 
       {/* Map Overlay (Conditional Rendering) */}
-      {active === 'Map' && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/70 backdrop-blur-2xl p-4">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/70 backdrop-blur-2xl p-4" style={{ display: active === 'Map' ? 'flex' : 'none' }}>
           <button className="absolute top-4 right-4 text-white hover:text-red-400 transition-colors" onClick={handleMap}>
             <X size={28} />
           </button>
@@ -484,18 +478,15 @@ export function Home() {
             <p className="text-red-300 text-sm sm:text-base">Map loading or coordinates unavailable. Please enable location services.</p>
           )}
         </div>
-      )}
 
       {/* Predict Overlay (Conditional Rendering) */}
-      {active === 'Predict' && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-xl p-4">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-xl p-4" style={{ display: active === 'Predict' ? 'flex' : 'none' }}>
           <button className="absolute top-4 right-4 text-white hover:text-red-400 transition-colors" onClick={handleMap}>
             <X size={28} />
           </button>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Predictive Analysis</h1>
           <p className="text-xl sm:text-2xl text-white text-center">Our prediction feature is under development. Check back soon!</p>
         </div>
-      )}
 
       {/* Search Overlay (Conditional Rendering) */}
       {activeSearch && (
