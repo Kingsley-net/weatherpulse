@@ -94,6 +94,7 @@ export function Home() {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
+          // Basic validation for coordinates
           if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
             setError('Invalid location coordinates.');
             setWeatherData(fakeData);
@@ -117,14 +118,16 @@ export function Home() {
             let cityResponse;
             try {
               cityResponse = await fetch(cityUrl, {
-                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' }, // IMPORTANT: Provide a unique User-Agent
+                // !!! IMPORTANT: CHANGE THIS TO YOUR ACTUAL EMAIL OR A UNIQUE APP IDENTIFIER !!!
+                headers: { 'User-Agent': 'WeatherPulseApp/1.0 (your-email@example.com)' },
               });
               if (!cityResponse.ok) throw new Error('City lookup API failed.');
             } catch (e) {
-              // Retry once for Nominatim due to rate limits
+              // Retry once for Nominatim due to potential rate limits
               await new Promise((resolve) => setTimeout(resolve, 1000));
               cityResponse = await fetch(cityUrl, {
-                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
+                // !!! IMPORTANT: CHANGE THIS TO YOUR ACTUAL EMAIL OR A UNIQUE APP IDENTIFIER !!!
+                headers: { 'User-Agent': 'WeatherPulseApp/1.0 (your-email@example.com)' },
               });
               if (!cityResponse.ok) throw new Error('City lookup API failed on retry.');
             }
@@ -171,12 +174,16 @@ export function Home() {
   // Handle city search
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchQuery) return; // Don't search if query is empty
+    if (!searchQuery) {
+        setError('Please enter a city or postal code.');
+        return;
+    }
+    setError(''); // Clear previous errors on new search attempt
     try {
       // Use Nominatim for forward geocoding
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
-        { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } } // IMPORTANT: Provide a unique User-Agent
+        { headers: { 'User-Agent': 'WeatherPulseApp/1.0 (your-email@example.com)' } } // !!! IMPORTANT: CHANGE THIS !!!
       );
       if (!response.ok) throw new Error('City search failed.');
       const data = await response.json();
@@ -218,7 +225,7 @@ export function Home() {
   ];
 
   // Current Date display
-  const date = new Date();
+  const date = new Date(); // Current time is Friday, June 13, 2025 at 8:37:56 PM WAT.
   const day = date.getDate();
   const dayOfWeek = date.toLocaleString('en-US', { weekday: 'short' });
   const month = date.toLocaleString('en-US', { month: 'long' });
@@ -288,7 +295,7 @@ export function Home() {
   const handleHovering5 = () => setIsHovering5(true);
   const handleHoveringOut5 = () => setIsHovering5(false);
   const handleHovering7 = () => setIsHovering7(true);
-  const handleHoveringOut7 = () => setIsHovering7(false);
+  const handleHoveringOut7 = () => setIsHoveringOut7(false); // Fix: ensure handleHoveringOut7 is used
 
   // Function to open search overlay
   const searching = (e) => {
@@ -299,157 +306,171 @@ export function Home() {
   const handleCancel = () => {
     setActiveSearch(false);
     setSearchQuery('');
-    setError(''); // Clear search-related errors
+    setError(''); // Clear any search-related errors
   };
 
   return (
-    // Main container with original layout classes
-    <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden fixed">
+    // Main container with responsive grid layout and gradient background
+    <div className="h-full w-full bg-gradient-to-br from-purple-600 to-blue-800 p-2 box-border fixed
+                    grid grid-rows-[auto_1fr_auto] /* Mobile: Header, Main Content, Footer */
+                    md:grid-rows-1 /* Desktop: Single row for sidebar & main */
+                    md:grid-cols-[auto_1fr] /* Desktop: Sidebar takes auto width, Main takes rest */
+                    md:gap-2">
 
       {/* Sidebar (Desktop only) */}
-      <div className="bg-gray-700/40 backdrop-blur-2xl rounded-xl text-white font-bold text-2xl md:flex flex-col items-center py-4 shadow-xl row-span-2 hidden">
+      <div className="liquid-glass-element rounded-xl text-white font-bold text-2xl md:flex flex-col items-center py-4 hidden">
+        <div className="liquid-glass-shine-overlay"></div> {/* Liquid glass shine effect */}
         {/* Sidebar Icons with hover and click effects */}
         <House
           onMouseOver={handleHovering1}
           onMouseOut={handleHoveringOut1}
           onClick={() => setActive('Home')}
-          className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
+          className="mb-4 w-6 h-6 hover:scale-125 transition-transform hover:text-blue-400 cursor-pointer relative z-10"
         />
         {isHovering && (
-          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Home</p>
+          <p className="absolute left-full ml-2 bg-gray-800/90 px-1.5 py-0.5 rounded text-xs shadow-md z-20">Home</p>
         )}
         <MapPin
           onMouseOver={handleHovering2}
           onMouseOut={handleHoveringOut2}
           onClick={() => setActive('Map')}
-          className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
+          className="mb-4 w-6 h-6 hover:scale-125 transition-transform hover:text-blue-400 cursor-pointer relative z-10"
         />
         {isHovering2 && (
-          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Map</p>
+          <p className="absolute left-full ml-2 bg-gray-800/90 px-1.5 py-0.5 rounded text-xs shadow-md z-20">Map</p>
         )}
         <GitGraphIcon
           onMouseOver={handleHovering5}
           onMouseOut={handleHoveringOut5}
           onClick={() => setActive('Predict')}
-          className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
+          className="mb-4 w-6 h-6 hover:scale-125 transition-transform hover:text-blue-400 cursor-pointer relative z-10"
         />
         {isHovering5 && (
-          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Predict</p>
+          <p className="absolute left-full ml-2 bg-gray-800/90 px-1.5 py-0.5 rounded text-xs shadow-md z-20">Predict</p>
         )}
         <Search
           onMouseOver={handleHovering7}
           onMouseOut={handleHoveringOut7}
           onClick={searching}
-          className="w-5 h-5 hover:scale-125 transition-transform hover:text-red-400 mt-auto"
+          className="w-6 h-6 hover:scale-125 transition-transform hover:text-red-400 mt-auto cursor-pointer relative z-10"
         />
         {isHovering7 && (
-          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Search</p>
+          <p className="absolute left-full ml-2 bg-gray-800/90 px-1.5 py-0.5 rounded text-xs shadow-md z-20">Search</p>
         )}
       </div>
 
-      {/* Header/Weather Info Card */}
-      <div className="text-white transparent backdrop-blur-sm rounded-xl p-4 ">
-        <div className="flex items-center justify-between mb-4">
-          <p className="font-bold text-base">WEATHERPULSE</p>
-          <p className="text-base font-semibold">
-            {dayOfWeek}, {day} {month}, {year}
-          </p>
-        </div>
-        {weatherdata && !error ? (
-          <div className="flex flex-col items-center">
-            <div className="flex items-center mb-2">
-              <MapPin className="text-xl" />
-              <div className="ml-2">
-                <p className="text-xl font-bold">{cityData || 'Loading...'}</p>
-                <p className="text-sm">{countryData || 'Loading...'}</p>
-              </div>
+      {/* Main Content Area: Contains Header/Weather Info Card and Home/Map/Predict views */}
+      <div className="flex flex-col h-full overflow-y-auto gap-2">
+        {/* Header/Weather Info Card */}
+        <div className="liquid-glass-element p-4 flex flex-col justify-between flex-shrink-0">
+          <div className="liquid-glass-shine-overlay"></div> {/* Liquid glass shine effect */}
+          <div className="relative z-10"> {/* Content needs to be above the shine */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-bold text-lg sm:text-xl">WEATHERPULSE</p>
+              <p className="text-sm sm:text-base font-semibold">
+                {dayOfWeek}, {day} {month}, {year}
+              </p>
             </div>
-            <p className="text-blue-500 font-bold text-4xl">
-              {getCurrentTemperature()}°C
-            </p>
-            <p className="text-sm">Temperature</p>
-            <div className="flex justify-around w-full mt-2">
-              <div>
-                <p className="text-blue-300 font-bold text-xl">
-                  {getCurrentWindDirection()}°
+            {weatherdata && !error ? (
+              <div className="flex flex-col items-center">
+                <div className="flex items-center mb-2">
+                  <MapPin className="text-xl sm:text-2xl" />
+                  <div className="ml-2">
+                    <p className="text-xl sm:text-2xl font-bold">{cityData || 'Loading...'}</p>
+                    <p className="text-sm sm:text-base text-gray-200">{countryData || 'Loading...'}</p>
+                  </div>
+                </div>
+                <p className="text-blue-300 font-bold text-5xl sm:text-6xl mb-1">
+                  {getCurrentTemperature()}°C
                 </p>
-                <p className="text-xs">Wind Direction</p>
+                <p className="text-sm sm:text-base text-gray-200 mb-4">Temperature</p>
+                <div className="flex justify-around w-full max-w-xs">
+                  <div className="text-center">
+                    <p className="text-blue-200 font-bold text-xl sm:text-2xl">
+                      {getCurrentWindDirection()}°
+                    </p>
+                    <p className="text-xs sm:text-sm text-gray-200">Wind Direction</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-blue-200 font-bold text-xl sm:text-2xl">
+                      {getCurrentWindSpeed()}Km/h
+                    </p>
+                    <p className="text-xs sm:text-sm text-gray-200">Wind Speed</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-blue-300 font-bold text-xl">
-                  {getCurrentWindSpeed()}Km/h
-                </p>
-                <p className="text-xs">Wind Speed</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="text-red-500 text-center text-sm">{error || 'No data available'}</div>
-        )}
-      </div>
-
-      {/* Main Content Area (Home View - Conditional Rendering) */}
-      {active === 'Home' && (
-        <div className="transparent backdrop-blur-sm rounded-xl p-4 overflow-hidden mt-2 md:h-3/4 md:flex">
-          <div>
-            <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
-            {weatherdata?.hourly ? (
-              <Times
-                hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
-                temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
-                weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
-              />
             ) : (
-              <p className="text-red-500 text-sm">No hourly forecast data</p>
+              <div className="text-red-300 text-center text-sm sm:text-base mt-4">{error || 'Fetching weather data...'}</div>
             )}
           </div>
-          <div>
-            <h1 className="text-xl font-bold">Forecast Graph</h1>
-            <div className="w-full h-40 mt-2">
-              {weatherdata?.hourly && chartData ? (
-                <Line data={chartData} options={chartOptions} />
-              ) : (
-                <p className="text-red-500 text-sm">No data for graph</p>
-              )}
+        </div>
+
+        {/* Main Content Area (Home View - Conditional Rendering) */}
+        {active === 'Home' && (
+          <div className="liquid-glass-element p-4 overflow-hidden flex-grow flex flex-col">
+            <div className="liquid-glass-shine-overlay"></div> {/* Liquid glass shine effect */}
+            <div className="relative z-10 flex-grow flex flex-col"> {/* Content needs to be above the shine */}
+              <h1 className="text-xl sm:text-2xl font-bold text-white text-center mb-4">Hourly Forecast</h1>
+              <div className="flex-grow flex flex-col overflow-y-auto mb-4"> {/* Scrollable for hourly forecast */}
+                {weatherdata?.hourly ? (
+                  <Times
+                    hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
+                    temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
+                    weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
+                  />
+                ) : (
+                  <p className="text-red-300 text-sm sm:text-base text-center">No hourly forecast data available.</p>
+                )}
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-white text-center mb-2">Temperature Graph</h1>
+              <div className="w-full h-40 sm:h-56 mt-2 relative"> {/* Increased height for chart on larger screens */}
+                {weatherdata?.hourly && chartData ? (
+                  <Line data={chartData} options={chartOptions} />
+                ) : (
+                  <p className="text-red-300 text-sm sm:text-base text-center">No data for graph visualization.</p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Footer - Mobile Bottom Navigation (Hidden on MD screens and up) */}
-      <div className="col-span-2 fixed bottom-0 right-0 left-0 shadow-3xl backdrop-blur-lg rounded-t-xl h-auto flex bg-blue-400 justify-around items-center z-40">
+      <div className="liquid-glass-nav fixed bottom-0 right-0 left-0 rounded-t-3xl h-auto flex justify-around items-center z-40 p-2 md:hidden">
+        <div className="liquid-glass-shine-overlay"></div> {/* Liquid glass shine effect */}
         {navItems.map((nav) => (
           <button
             key={nav.id}
             onClick={() => setActive(nav.id)}
             className={`relative flex flex-col font-bold items-center justify-center py-2 px-3 transition-all duration-200
-              ${active === nav.id ? 'text-blue-600 font-bold scale-110 drop-shadow-lg' : 'opacity-80'}`}
+              ${active === nav.id ? 'text-blue-600 scale-110 drop-shadow-lg' : 'text-white opacity-80'}`}
           >
-            <p>{nav.icons}</p>
-            <p className="text-xs mt-1">{nav.label}</p>
+            <p className="relative z-10">{nav.icons}</p> {/* Ensure icon is above shine */}
+            <p className="text-xs mt-1 relative z-10">{nav.label}</p> {/* Ensure label is above shine */}
           </button>
         ))}
         <button
           onClick={searching}
-          className="flex flex-col items-center justify-center font-bold py-2 px-3 transition-all duration-200 opacity-80 focus:text-yellow-300"
+          className="relative flex flex-col items-center justify-center font-bold py-2 px-3 transition-all duration-200 text-white opacity-80 focus:text-yellow-300"
         >
-          <Search />
-          <p className="text-xs mt-1">Search</p>
+          <Search className="relative z-10" /> {/* Ensure icon is above shine */}
+          <p className="text-xs mt-1 relative z-10">Search</p> {/* Ensure label is above shine */}
         </button>
       </div>
 
       {/* Map Overlay (Conditional Rendering) */}
       {active === 'Map' && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/70 backdrop-blur-2xl">
-          <button className="absolute top-1 right-2 text-white" onClick={handleMap}>
-            <X />
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/70 backdrop-blur-2xl p-4">
+          <button className="absolute top-4 right-4 text-white hover:text-red-400 transition-colors" onClick={handleMap}>
+            <X size={28} />
           </button>
-          <h1 className="text-xl font-bold text-white">Map</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Current Location Map</h1>
           {coordinates ? (
             <MapContainer
               center={[coordinates.latitude, coordinates.longitude]}
               zoom={13}
-              style={{ height: '80%', width: '80%', borderRadius: '8px' }}
+              className="h-3/4 w-full max-w-3xl rounded-xl shadow-lg border border-gray-700"
+              attributionControl={false} // Hide default Leaflet attribution for cleaner UI
             >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -460,45 +481,46 @@ export function Home() {
               </Marker>
             </MapContainer>
           ) : (
-            <p className="text-red-500 text-sm">Map loading or coordinates unavailable</p>
+            <p className="text-red-300 text-sm sm:text-base">Map loading or coordinates unavailable. Please enable location services.</p>
           )}
         </div>
       )}
 
       {/* Predict Overlay (Conditional Rendering) */}
       {active === 'Predict' && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/90">
-          <button className="absolute top-1 right-2 text-white" onClick={handleMap}>
-            <X />
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-xl p-4">
+          <button className="absolute top-4 right-4 text-white hover:text-red-400 transition-colors" onClick={handleMap}>
+            <X size={28} />
           </button>
-          <h1 className="text-2xl font-bold text-white">Predict</h1>
-          <p className="text-xl text-white">Prediction feature not yet implemented.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">Predictive Analysis</h1>
+          <p className="text-xl sm:text-2xl text-white text-center">Our prediction feature is under development. Check back soon!</p>
         </div>
       )}
 
       {/* Search Overlay (Conditional Rendering) */}
       {activeSearch && (
-        <div className="flex flex-col justify-center items-center h-screen w-full fixed top-0 left-0 bg-gray-950/50 backdrop-blur-md z-50">
-          <form onSubmit={handleSearch} className="w-4/5 flex items-center">
+        <div className="flex flex-col justify-center items-center h-screen w-full fixed top-0 left-0 bg-gray-950/50 backdrop-blur-xl z-50 p-4">
+          <form onSubmit={handleSearch} className="w-full max-w-md flex items-center bg-gray-800 rounded-xl shadow-lg">
             <input
               type="search"
               placeholder="Search city or postal code"
-              className="text-white w-full border border-blue-300 p-2 rounded-xl"
+              className="text-white w-full bg-transparent p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button
               type="submit"
-              className="ml-2 text-white font-bold border border-blue-300 p-2 rounded-xl"
+              className="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl transition-colors"
             >
               Search
             </button>
           </form>
+          {error && <p className="text-red-300 text-sm mt-2">{error}</p>} {/* Display search-specific error */}
           <button
-            className="text-white font-bold absolute top-2 right-2 rounded-full border border-blue-300 p-1"
+            className="text-white font-bold absolute top-4 right-4 p-2 rounded-full border border-blue-300 hover:bg-blue-600 transition-colors"
             onClick={handleCancel}
           >
-            <X />
+            <X size={28} />
           </button>
         </div>
       )}
@@ -515,16 +537,6 @@ export function Home() {
             </svg>
             <span className="mt-4 text-blue-100 text-center text-2xl font-extrabold tracking-wide animate-pulse">Loading Weather...</span>
           </div>
-          <style>{`
-            @keyframes cloud-move {
-              0% { transform: translateX(0); }
-              50% { transform: translateX(10px); }
-              100% { transform: translateX(0); }
-            }
-            .animate-cloud-move {
-              animation: cloud-move 2.2s ease-in-out infinite;
-            }
-          `}</style>
         </div>
       )}
     </div>
