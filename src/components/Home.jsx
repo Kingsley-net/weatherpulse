@@ -421,7 +421,7 @@ export function Home() {
       {/* Main content area with responsive padding */}
       <div className="h-full w-full md:pl-10 flex flex-col relative z-10">
         {/* Header/Weather Info Card */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/10 shadow-lg">
+        <div className="transparent backdrop-blur-lg rounded-xl p-4 border border-white/10 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <p className="font-bold text-base">WEATHERPULSE</p>
             <p className="text-base font-semibold">
