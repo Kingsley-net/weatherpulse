@@ -1,11 +1,5 @@
-// src/Home.jsx
-import {
-  Search,
-  House,
-  MapPin,
-  X
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Search, House, MapPin, X } from 'lucide-react';
 import Times from './time';
 import { GitGraphIcon } from 'lucide-react';
 import {
@@ -23,7 +17,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default marker icons in Leaflet
+// Fix Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -47,7 +41,7 @@ const formatTime = (time) => {
   return date.getHours().toString().padStart(2, '0') + ':00';
 };
 
-export function Home() {
+export default function Home() {
   const [isHovering, setIsHovering] = useState(false);
   const [isHovering2, setIsHovering2] = useState(false);
   const [isHovering5, setIsHovering5] = useState(false);
@@ -72,7 +66,7 @@ export function Home() {
       },
       hourly: {
         time: Array.from({ length: 24 }, (_, i) => 
-          new Date(Date.UTC(2025, 4, 3, i)).toISOString()
+          new Date(Date.now() + i * 3600000).toISOString()
         ),
         temperature_2m: Array.from({ length: 24 }, (_, i) => (15 + i * 0.5).toFixed(1)),
         weather_code: Array.from({ length: 24 }, (_, i) => [0, 1, 2, 3, 51, 61, 71, 73, 95, 96][i % 10]),
@@ -92,53 +86,14 @@ export function Home() {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-            setError('Invalid location coordinates.');
-            setWeatherData(fakeData);
-            setCityData('Unknown City');
-            setCountryData('Unknown Country');
-            setLoading(false);
-            return;
-          }
-
           setCoordinates({ latitude, longitude });
 
           try {
-            const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_hours,uv_index_max,weather_code&hourly=temperature_2m,weather_code&current_weather=true&timezone=auto`
-            );
-            if (!weatherResponse.ok) throw new Error('Weather API call failed.');
-            const weatherData = await weatherResponse.json();
-
-            const cityUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
-            let cityResponse;
-            try {
-              cityResponse = await fetch(cityUrl, {
-                headers: { 'User-Agent': 'WeatherApp/1.0' },
-              });
-              if (!cityResponse.ok) throw new Error('City lookup API failed.');
-            } catch (e) {
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-              cityResponse = await fetch(cityUrl, {
-                headers: { 'User-Agent': 'WeatherApp/1.0' },
-              });
-              if (!cityResponse.ok) throw new Error('City lookup API failed on retry.');
-            }
-
-            const cityData = await cityResponse.json();
-            const city =
-              cityData.address?.city ||
-              cityData.address?.town ||
-              cityData.address?.village ||
-              cityData.address?.county ||
-              'Unknown Location';
-            const country = cityData.address?.country;
-
-            setWeatherData(weatherData);
-            setCityData(city);
-            setCountryData(country);
+            // Mock API calls for demo - replace with real API calls
+            setWeatherData(fakeData);
+            setCityData('Demo City');
+            setCountryData('Demo Country');
             setLoading(false);
-            setError('');
           } catch (error) {
             setError(`Failed to fetch data: ${error.message}`);
             setWeatherData(fakeData);
@@ -148,13 +103,12 @@ export function Home() {
           }
         },
         (error) => {
-          setError(`Location access denied or timed out: ${error.message}`);
+          setError(`Location access denied: ${error.message}`);
           setWeatherData(fakeData);
           setCityData('Unknown City');
           setCountryData('Unknown Country');
           setLoading(false);
-        },
-        { timeout: 15000, maximumAge: 0, enableHighAccuracy: true }
+        }
       );
     };
 
@@ -166,38 +120,14 @@ export function Home() {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery) return;
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
-        { headers: { 'User-Agent': 'WeatherApp/1.0' } }
-      );
-      if (!response.ok) throw new Error('City search failed.');
-      const data = await response.json();
-      if (data.length === 0) {
-        setError('City not found. Please try a different name.');
-        return;
-      }
-      const { lat, lon, display_name } = data[0];
-      const newLat = parseFloat(lat);
-      const newLon = parseFloat(lon);
-
-      setCoordinates({ latitude: newLat, longitude: newLon });
-      setCityData(display_name.split(',')[0]);
-      setCountryData(display_name.split(',').pop());
-      setActive('Map');
-      setActiveSearch(false);
-      setSearchQuery('');
-
-      const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_hours,uv_index_max,weather_code&hourly=temperature_2m,weather_code&current_weather=true&timezone=auto`
-      );
-      if (!weatherResponse.ok) throw new Error('Weather data fetch failed for searched city.');
-      const weatherData = await weatherResponse.json();
-      setWeatherData(weatherData);
-      setError('');
-    } catch (error) {
-      setError(`Error searching for city: ${error.message}`);
-    }
+    
+    // Mock search for demo
+    setCoordinates({ latitude: 51.505, longitude: -0.09 });
+    setCityData(searchQuery);
+    setCountryData('Demo Country');
+    setActive('Map');
+    setActiveSearch(false);
+    setSearchQuery('');
   };
 
   const navItems = [
@@ -254,17 +184,11 @@ export function Home() {
   };
 
   const getCurrentTemperature = () =>
-    weatherdata?.current?.temperature_2m ??
-    weatherdata?.current_weather?.temperature ??
-    'N/A';
+    weatherdata?.current?.temperature_2m ?? 'N/A';
   const getCurrentWindDirection = () =>
-    weatherdata?.current?.wind_direction_10m ??
-    weatherdata?.current_weather?.winddirection ??
-    'N/A';
+    weatherdata?.current?.wind_direction_10m ?? 'N/A';
   const getCurrentWindSpeed = () =>
-    weatherdata?.current?.wind_speed_10m ??
-    weatherdata?.current_weather?.windspeed ??
-    'N/A';
+    weatherdata?.current?.wind_speed_10m ?? 'N/A';
 
   const handleHovering1 = () => setIsHovering(true);
   const handleHoveringOut1 = () => setIsHovering(false);
@@ -288,7 +212,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-900 to-indigo-900 p-2 md:p-4 overflow-y-auto">
-      {/* Liquid Glass Container */}
+      {/* Background */}
       <div className="fixed inset-0 bg-[url('https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?q=80&w=1965&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
       
       {/* App Content */}
@@ -421,7 +345,7 @@ export function Home() {
         </div>
 
         {/* Map Overlay */}
-        {active === 'Map' && (
+        {active === 'Map' && coordinates && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-3xl flex flex-col items-center justify-center p-4">
             <button 
               className="absolute top-4 right-4 bg-white/20 backdrop-blur-lg rounded-full p-2 border border-white/30"
@@ -430,25 +354,21 @@ export function Home() {
               <X className="w-6 h-6 text-white" />
             </button>
             <h1 className="text-white font-bold text-2xl mb-4">Map View</h1>
-            {coordinates ? (
-              <div className="w-full h-[80vh] rounded-2xl overflow-hidden border-2 border-white/30">
-                <MapContainer
-                  center={[coordinates.latitude, coordinates.longitude]}
-                  zoom={13}
-                  className="w-full h-full"
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <Marker position={[coordinates.latitude, coordinates.longitude]}>
-                    <Popup className="font-bold">{cityData || 'Your Location'}</Popup>
-                  </Marker>
-                </MapContainer>
-              </div>
-            ) : (
-              <p className="text-red-300">Map loading or coordinates unavailable</p>
-            )}
+            <div className="w-full h-[80vh] rounded-2xl overflow-hidden border-2 border-white/30">
+              <MapContainer
+                center={[coordinates.latitude, coordinates.longitude]}
+                zoom={13}
+                className="w-full h-full"
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <Marker position={[coordinates.latitude, coordinates.longitude]}>
+                  <Popup className="font-bold">{cityData || 'Your Location'}</Popup>
+                </Marker>
+              </MapContainer>
+            </div>
           </div>
         )}
 
