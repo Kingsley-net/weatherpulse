@@ -3,10 +3,16 @@ import {
   Search,
   House,
   MapPin,
-  X
+  X,
+  Cloud,
+  CloudRain,
+  CloudSun,
+  Sun,
+  Snowflake,
+  CloudLightning
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import Times from './time'; // Assuming this is your component for hourly forecast display
+import Times from './time';
 import { GitGraphIcon } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -48,6 +54,62 @@ const formatTime = (time) => {
   return date.getHours().toString().padStart(2, '0') + ':00';
 };
 
+// Weather code to background mapping
+const weatherBackgrounds = {
+  clear: 'bg-gradient-to-br from-blue-400 to-blue-600',
+  cloudy: 'bg-gradient-to-br from-gray-400 to-gray-600',
+  rainy: 'bg-gradient-to-br from-gray-500 to-blue-800',
+  snowy: 'bg-gradient-to-br from-blue-100 to-blue-300',
+  thunder: 'bg-gradient-to-br from-purple-800 to-gray-900',
+  sunny: 'bg-gradient-to-br from-yellow-400 to-orange-500',
+  foggy: 'bg-gradient-to-br from-gray-300 to-gray-500',
+  default: 'bg-gradient-to-br from-blue-900 to-indigo-900'
+};
+
+// Weather code to icon mapping
+const weatherIcons = {
+  0: <Sun className="text-yellow-400" size={24} />, // Clear sky
+  1: <CloudSun className="text-yellow-300" size={24} />, // Mainly clear
+  2: <CloudSun className="text-gray-300" size={24} />, // Partly cloudy
+  3: <Cloud className="text-gray-400" size={24} />, // Overcast
+  45: <Cloud className="text-gray-300" size={24} />, // Fog
+  48: <Cloud className="text-gray-300" size={24} />, // Depositing rime fog
+  51: <CloudRain className="text-blue-300" size={24} />, // Light drizzle
+  53: <CloudRain className="text-blue-400" size={24} />, // Moderate drizzle
+  55: <CloudRain className="text-blue-500" size={24} />, // Dense drizzle
+  56: <CloudRain className="text-blue-300" size={24} />, // Light freezing drizzle
+  57: <CloudRain className="text-blue-500" size={24} />, // Dense freezing drizzle
+  61: <CloudRain className="text-blue-400" size={24} />, // Slight rain
+  63: <CloudRain className="text-blue-500" size={24} />, // Moderate rain
+  65: <CloudRain className="text-blue-600" size={24} />, // Heavy rain
+  66: <CloudRain className="text-blue-300" size={24} />, // Light freezing rain
+  67: <CloudRain className="text-blue-500" size={24} />, // Heavy freezing rain
+  71: <Snowflake className="text-blue-100" size={24} />, // Slight snow fall
+  73: <Snowflake className="text-blue-200" size={24} />, // Moderate snow fall
+  75: <Snowflake className="text-blue-300" size={24} />, // Heavy snow fall
+  77: <Snowflake className="text-blue-200" size={24} />, // Snow grains
+  80: <CloudRain className="text-blue-400" size={24} />, // Slight rain showers
+  81: <CloudRain className="text-blue-500" size={24} />, // Moderate rain showers
+  82: <CloudRain className="text-blue-600" size={24} />, // Violent rain showers
+  85: <Snowflake className="text-blue-200" size={24} />, // Slight snow showers
+  86: <Snowflake className="text-blue-300" size={24} />, // Heavy snow showers
+  95: <CloudLightning className="text-purple-400" size={24} />, // Thunderstorm
+  96: <CloudLightning className="text-purple-500" size={24} />, // Thunderstorm with slight hail
+  99: <CloudLightning className="text-purple-600" size={24} /> // Thunderstorm with heavy hail
+};
+
+// Get appropriate background based on weather code
+const getWeatherBackground = (weatherCode) => {
+  if (weatherCode === 0 || weatherCode === 1) return weatherBackgrounds.sunny;
+  if (weatherCode === 2 || weatherCode === 3) return weatherBackgrounds.cloudy;
+  if (weatherCode >= 51 && weatherCode <= 67) return weatherBackgrounds.rainy;
+  if (weatherCode >= 71 && weatherCode <= 77) return weatherBackgrounds.snowy;
+  if (weatherCode >= 80 && weatherCode <= 86) return weatherBackgrounds.rainy;
+  if (weatherCode >= 95 && weatherCode <= 99) return weatherBackgrounds.thunder;
+  if (weatherCode === 45 || weatherCode === 48) return weatherBackgrounds.foggy;
+  return weatherBackgrounds.default;
+};
+
 export function Home() {
   const [isHovering, setIsHovering] = useState(false);
   const [isHovering2, setIsHovering2] = useState(false);
@@ -62,6 +124,8 @@ export function Home() {
   const [active, setActive] = useState('Home');
   const [activeSearch, setActiveSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [weatherBackground, setWeatherBackground] = useState(weatherBackgrounds.default);
+  const [weatherIcon, setWeatherIcon] = useState(null);
 
   useEffect(() => {
     // Fake data for fallback/testing
@@ -112,16 +176,20 @@ export function Home() {
             if (!weatherResponse.ok) throw new Error('Weather API call failed.');
             const weatherData = await weatherResponse.json();
 
+            // Update weather background and icon based on current weather
+            const currentWeatherCode = weatherData.current_weather?.weathercode || 0;
+            setWeatherBackground(getWeatherBackground(currentWeatherCode));
+            setWeatherIcon(weatherIcons[currentWeatherCode] || weatherIcons[0]);
+
             // Using Nominatim for reverse geocoding
             const cityUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
             let cityResponse;
             try {
               cityResponse = await fetch(cityUrl, {
-                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' }, // IMPORTANT: Provide a unique User-Agent
+                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
               });
               if (!cityResponse.ok) throw new Error('City lookup API failed.');
             } catch (e) {
-              // Retry once for Nominatim due to rate limits
               await new Promise((resolve) => setTimeout(resolve, 1000));
               cityResponse = await fetch(cityUrl, {
                 headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
@@ -145,7 +213,7 @@ export function Home() {
             setError('');
           } catch (error) {
             setError(`Failed to fetch data: ${error.message}`);
-            setWeatherData(fakeData); // Fallback to fake data on error
+            setWeatherData(fakeData);
             setCityData('Unknown City');
             setCountryData('Unknown Country');
             setLoading(false);
@@ -153,17 +221,17 @@ export function Home() {
         },
         (error) => {
           setError(`Location access denied or timed out: ${error.message}`);
-          setWeatherData(fakeData); // Fallback to fake data on geolocation error
+          setWeatherData(fakeData);
           setCityData('Unknown City');
           setCountryData('Unknown Country');
           setLoading(false);
         },
-        { timeout: 15000, maximumAge: 0, enableHighAccuracy: true } // Geolocation options
+        { timeout: 15000, maximumAge: 0, enableHighAccuracy: true }
       );
     };
 
     getUserLocation();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   // Handles closing map or prediction overlays
   const handleMap = () => setActive('Home');
@@ -171,12 +239,11 @@ export function Home() {
   // Handle city search
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchQuery) return; // Don't search if query is empty
+    if (!searchQuery) return;
     try {
-      // Use Nominatim for forward geocoding
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
-        { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } } // IMPORTANT: Provide a unique User-Agent
+        { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } }
       );
       if (!response.ok) throw new Error('City search failed.');
       const data = await response.json();
@@ -188,23 +255,26 @@ export function Home() {
       const newLat = parseFloat(lat);
       const newLon = parseFloat(lon);
 
-      // Update coordinates and city/country for the new location
       setCoordinates({ latitude: newLat, longitude: newLon });
-      // Extract main city name from display_name
       setCityData(display_name.split(',')[0]);
-      setCountryData(display_name.split(',').pop()); // Get the last part (country)
-      setActive('Map'); // Switch to map view after successful search
-      setActiveSearch(false); // Close search overlay
-      setSearchQuery(''); // Clear search query after successful search
+      setCountryData(display_name.split(',').pop());
+      setActive('Map');
+      setActiveSearch(false);
+      setSearchQuery('');
 
-      // Fetch weather for the newly searched location
       const weatherResponse = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_hours,uv_index_max,weather_code&hourly=temperature_2m,weather_code&current_weather=true&timezone=auto`
       );
       if (!weatherResponse.ok) throw new Error('Weather data fetch failed for searched city.');
       const weatherData = await weatherResponse.json();
+      
+      // Update weather background and icon for new location
+      const currentWeatherCode = weatherData.current_weather?.weathercode || 0;
+      setWeatherBackground(getWeatherBackground(currentWeatherCode));
+      setWeatherIcon(weatherIcons[currentWeatherCode] || weatherIcons[0]);
+      
       setWeatherData(weatherData);
-      setError(''); // Clear any previous errors
+      setError('');
     } catch (error) {
       setError(`Error searching for city: ${error.message}`);
     }
@@ -224,24 +294,24 @@ export function Home() {
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
 
-  // Chart Data: 24 hours, blue/navy colors
+  // Chart Data
   const chartData = weatherdata?.hourly && {
     labels: weatherdata.hourly.time.slice(0, 24).map((time) => formatTime(time)),
     datasets: [
       {
         label: 'Temp (°C)',
         data: weatherdata.hourly.temperature_2m.slice(0, 24),
-        borderColor: '#2563eb', // Tailwind's blue-600
-        backgroundColor: 'rgba(30, 58, 138, 0.35)', // A navy blue with opacity for fill
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(30, 58, 138, 0.35)',
         fill: true,
-        tension: 0.4, // Smooth the line
+        tension: 0.4,
       },
     ],
   };
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Allows the chart to fill its container's height
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
@@ -257,7 +327,7 @@ export function Home() {
     scales: {
       x: {
         title: { display: false },
-        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } }, // Limit ticks for smaller screens
+        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } },
       },
       y: {
         title: { display: false },
@@ -280,7 +350,7 @@ export function Home() {
     weatherdata?.current_weather?.windspeed ??
     'N/A';
 
-  // UI logic for hover states (kept as-is based on your request)
+  // UI logic for hover states
   const handleHovering1 = () => setIsHovering(true);
   const handleHoveringOut1 = () => setIsHovering(false);
   const handleHovering2 = () => setIsHovering2(true);
@@ -299,15 +369,17 @@ export function Home() {
   const handleCancel = () => {
     setActiveSearch(false);
     setSearchQuery('');
-    setError(''); // Clear search-related errors
+    setError('');
   };
 
   return (
-    // Main container with responsive layout
-    <div className="h-screen w-full bg-gradient-to-br from-blue-900/50 to-indigo-900/50 gap-2 p-2 box-border overflow-hidden fixed">
+    // Dynamic weather background with glass overlay
+    <div className={`h-screen w-full ${weatherBackground} transition-colors duration-1000 gap-2 p-2 box-border overflow-hidden fixed`}>
+      {/* Main content with glass overlay */}
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+      
       {/* Sidebar (Desktop only) */}
       <div className="hidden md:flex fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-700/20 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-xl z-30 border border-white/10">
-        {/* Sidebar Icons with hover and click effects */}
         <House
           onMouseOver={handleHovering1}
           onMouseOut={handleHoveringOut1}
@@ -347,7 +419,7 @@ export function Home() {
       </div>
 
       {/* Main content area with responsive padding */}
-      <div className="h-full w-full md:pl-10 flex flex-col">
+      <div className="h-full w-full md:pl-10 flex flex-col relative z-10">
         {/* Header/Weather Info Card */}
         <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/10 shadow-lg">
           <div className="flex items-center justify-between mb-4">
@@ -365,9 +437,12 @@ export function Home() {
                   <p className="text-sm">{countryData || 'Loading...'}</p>
                 </div>
               </div>
-              <p className="text-blue-300 font-bold text-4xl">
-                {getCurrentTemperature()}°C
-              </p>
+              <div className="flex items-center">
+                {weatherIcon}
+                <p className="text-blue-300 font-bold text-4xl ml-2">
+                  {getCurrentTemperature()}°C
+                </p>
+              </div>
               <p className="text-sm">Temperature</p>
               <div className="flex justify-around w-full mt-2">
                 <div>
@@ -389,7 +464,7 @@ export function Home() {
           )}
         </div>
 
-        {/* Main Content Area (Home View - Conditional Rendering) */}
+        {/* Main Content Area (Home View) */}
         {active === 'Home' && (
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
             <div className="flex-1">
@@ -418,7 +493,7 @@ export function Home() {
         )}
       </div>
 
-      {/* Footer - Mobile Bottom Navigation (Hidden on MD screens and up) */}
+      {/* Footer - Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 shadow-3xl backdrop-blur-xl rounded-t-xl h-auto flex bg-blue-400/20 justify-around items-center z-40 border-t border-white/10">
         {navItems.map((nav) => (
           <button
@@ -440,7 +515,7 @@ export function Home() {
         </button>
       </div>
 
-      {/* Map Overlay (Conditional Rendering) */}
+      {/* Map Overlay */}
       {active === 'Map' && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/70 backdrop-blur-2xl">
           <button className="absolute top-4 right-4 text-white bg-white/10 p-2 rounded-full backdrop-blur-md" onClick={handleMap}>
@@ -469,7 +544,7 @@ export function Home() {
         </div>
       )}
 
-      {/* Predict Overlay (Conditional Rendering) */}
+      {/* Predict Overlay */}
       {active === 'Predict' && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-xl">
           <button className="absolute top-4 right-4 text-white bg-white/10 p-2 rounded-full backdrop-blur-md" onClick={handleMap}>
@@ -480,7 +555,7 @@ export function Home() {
         </div>
       )}
 
-      {/* Search Overlay (Conditional Rendering) */}
+      {/* Search Overlay */}
       {activeSearch && (
         <div className="fixed inset-0 z-50 flex flex-col justify-center items-center bg-gray-950/70 backdrop-blur-xl">
           <form onSubmit={handleSearch} className="w-4/5 max-w-md flex items-center">
@@ -507,7 +582,7 @@ export function Home() {
         </div>
       )}
 
-      {/* Weather-like Loading Overlay (Conditional Rendering) */}
+      {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-950/70 backdrop-blur-2xl z-50">
           <div className="flex flex-col items-center">
