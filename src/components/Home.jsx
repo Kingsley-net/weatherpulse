@@ -22,8 +22,6 @@ import { Line } from 'react-chartjs-2';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import SunsL from '.images/nesl.jpg'
-import Sunss from '.images/nes.jpg'
 
 
 // Fix for default marker icons in Leaflet
@@ -307,7 +305,7 @@ export function Home() {
 
   return (
     // Main container with responsive layout
-    <div className="h-screen w-full bg-gradient-to-br from-blue-900/50 to-indigo-900/50 gap-2 p-2 box-border overflow-hidden fixed">
+    <div className="h-screen w-full custom-bg gap-2 p-2 box-border overflow-hidden fixed">
       {/* Sidebar (Desktop only) */}
       <div className="hidden md:flex fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-700/20 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-xl z-30 border border-white/10">
         {/* Sidebar Icons with hover and click effects */}
