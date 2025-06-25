@@ -22,6 +22,9 @@ import { Line } from 'react-chartjs-2';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import SunsL from '.images/nesl.jpg'
+import Sunss from '.images/nes.jpg'
+
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
