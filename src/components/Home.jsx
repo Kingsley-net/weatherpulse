@@ -305,9 +305,9 @@ export function Home() {
 
   return (
     // Main container with responsive layout
-    <div className="h-screen w-full custom-bg gap-2 p-2 box-border overflow-hidden fixed">
+    <div className="h-screen w-full custom-bg gap-2 p-2 box-border ">
       {/* Sidebar (Desktop only) */}
-      <div className="hidden md:flex fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-700/20 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-xl z-30 border border-white/10">
+      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-700/20 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-xl z-30 border border-white/10">
         {/* Sidebar Icons with hover and click effects */}
         <House
           onMouseOver={handleHovering1}
