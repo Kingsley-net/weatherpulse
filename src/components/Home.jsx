@@ -307,7 +307,7 @@ export function Home() {
     // Main container with responsive layout
     <div className="h-screen w-full custom-bg gap-2 p-2 box-border ">
       {/* Sidebar (Desktop only) */}
-      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-700/20 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-xl z-30 border border-white/10">
+      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-xl z-30 border border-white/10">
         {/* Sidebar Icons with hover and click effects */}
         <House
           onMouseOver={handleHovering1}
@@ -350,7 +350,7 @@ export function Home() {
       {/* Main content area with responsive padding */}
       <div className="h-full w-full md:pl-10 flex flex-col">
         {/* Header/Weather Info Card */}
-        <div className="transparent backdrop-blur-lg rounded-xl p-4 border border-white/10 shadow-lg">
+        <div className="transparent backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <p className="font-bold text-base">WEATHERPULSE</p>
             <p className="text-base font-semibold">
@@ -366,19 +366,19 @@ export function Home() {
                   <p className="text-sm">{countryData || 'Loading...'}</p>
                 </div>
               </div>
-              <p className="text-blue-300 font-bold text-4xl">
+              <p className="text-blue-500 font-bold text-4xl">
                 {getCurrentTemperature()}°C
               </p>
               <p className="text-sm">Temperature</p>
               <div className="flex justify-around w-full mt-2">
                 <div>
-                  <p className="text-blue-200 font-bold text-xl">
+                  <p className="text-blue-700 font-bold text-xl">
                     {getCurrentWindDirection()}°
                   </p>
                   <p className="text-xs">Wind Direction</p>
                 </div>
                 <div>
-                  <p className="text-blue-200 font-bold text-xl">
+                  <p className="text-blue-500 font-bold text-xl">
                     {getCurrentWindSpeed()}Km/h
                   </p>
                   <p className="text-xs">Wind Speed</p>
@@ -392,7 +392,7 @@ export function Home() {
 
         {/* Main Content Area (Home View - Conditional Rendering) */}
         {active === 'Home' && (
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
+          <div className="transparent backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
             <div className="flex-1">
               <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
               {weatherdata?.hourly ? (
