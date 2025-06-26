@@ -477,7 +477,7 @@ export function Home() {
             <X />
           </button>
           <h1 className="text-2xl font-bold text-white">Predict</h1>
-          <p className="text-xl text-white">Prediction feature not yet implemented.</p>
+          <p className="text-sm text-white">Prediction feature not yet implemented.</p>
         </div>
       )}
 
@@ -518,7 +518,7 @@ export function Home() {
               <ellipse cx="80" cy="45" rx="24" ry="16" fill="#a5b4fc" />
               <ellipse cx="70" cy="60" rx="32" ry="13" fill="#e0e7ff" />
             </svg>
-            <span className="mt-4 text-blue-100 text-center text-2xl font-extrabold tracking-wide animate-pulse">Loading Weather...</span>
+            <span className="mt-4 text-blue-100 text-center text-2xl font-extrabold tracking-wide animate-pulse">Loading Weather data please wait...</span>
           </div>
           <style>{`
             @keyframes cloud-move {
