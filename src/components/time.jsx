@@ -1,4 +1,4 @@
-export default function Times({ hourlyTimes, temperatures, weatherCode }) {
+export default function Times({ hourlyTimes, temperatures, weatherCode,description }) {
   const formatTime = (isoTime) => {
     return new Date(isoTime).toLocaleString('en-US', {
       timeZone: 'America/New_York',
@@ -170,6 +170,38 @@ export default function Times({ hourlyTimes, temperatures, weatherCode }) {
     }
   };
 
+const getDescription = (code) => {
+
+    switch (code) {
+      case 0: return "Sunny";
+      case 1:
+      case 2: return "Partlycloudly";
+      case 3:
+      case 45:
+      case 48: return "Cloudly";
+      case 51:
+      case 53:
+      case 55:
+      case 61:
+      case 63:
+      case 65:
+      case 80:
+      case 81:
+      case 82: return "Rainy";
+      case 71:
+      case 73:
+      case 75:
+      case 85:
+      case 86: return "Snowy";
+      case 95:
+      case 96:
+      case 99: return "Thunderstorm";
+      default: return "CloudyIcon";
+    }
+  };
+
+
+  
   if (!Array.isArray(hourlyTimes) || !Array.isArray(temperatures) || !Array.isArray(weatherCode)) {
     return <div className="text-red-500">No weather data available</div>;
   }
@@ -183,6 +215,7 @@ export default function Times({ hourlyTimes, temperatures, weatherCode }) {
         >
           <p>{formatTime(time)}</p>
           <div>{getWeatherImage(weatherCode[index], time)}</div>
+          <p>{getDescription(weatherDescription[index]}</p>
           <p>{temperatures[index]}°C</p>
         </div>
       ))}
