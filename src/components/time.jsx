@@ -143,12 +143,12 @@ export default function Times({ hourlyTimes, temperatures, weatherCode }) {
   const getWeatherImage = (code, time) => {
     const night = isNight(time);
     switch (code) {
-      case 0: return <SunnyIcon />;
+      case 0: return {icons:<SunnyIcon />,words: "Sunny"};
       case 1:
-      case 2: return <PartlyCloudyIcon />;
+      case 2: return {icons:<PartlyCloudyIcon />,words: "Partly Cloudy"};
       case 3:
       case 45:
-      case 48: return <CloudyIcon />;
+      case 48: return {icons:<CloudyIcon />,words: "Cloudy"};
       case 51:
       case 53:
       case 55:
@@ -157,16 +157,16 @@ export default function Times({ hourlyTimes, temperatures, weatherCode }) {
       case 65:
       case 80:
       case 81:
-      case 82: return <RainyIcon />;
+      case 82: return {icons:<RainyIcon />,words: "Rainy"};
       case 71:
       case 73:
       case 75:
       case 85:
-      case 86: return <SnowyIcon />;
+      case 86: return {icons:<SnowyIcon />,words: "Snowy"};
       case 95:
       case 96:
-      case 99: return <ThunderstormIcon />;
-      default: return <CloudyIcon />;
+      case 99: return {icons:<ThunderstormIcon />,words: "ThunderStorm"};
+      default: return {icons:<CloudyIcon />,words: "Cloudy"};
     }
   };
 
@@ -183,7 +183,9 @@ export default function Times({ hourlyTimes, temperatures, weatherCode }) {
         >
           <p>{formatTime(time)}</p>
           <div>{getWeatherImage(weatherCode[index], time)}</div>
+          <p>{getWeatherImage(index.words)}</p>
           <p>{temperatures[index]}°C</p>
+          
         </div>
       ))}
     </div>
