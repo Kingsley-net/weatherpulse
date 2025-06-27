@@ -237,9 +237,4 @@ const ColorfulWeatherIcons = () => {
       ))}
     </div>
   );
-}
-
-
-
-
-
+};
