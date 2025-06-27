@@ -215,10 +215,10 @@ const getDescription = (code) => {
           key={index}
           className="relative bg-white/40 backdrop-blur-3xl h-30 mr-2 min-w-1/5 rounded-lg text-white flex flex-col items-center justify-around font-bold"
         >
-          <p>{formatTime(time)}</p>
+          <p className="text-sm text-blue-500">{formatTime(time)}</p>
           <div>{getWeatherImage(weatherCode[index], time)}</div>
-          <p className="bg-blue-300">{getDescription(weatherCode[index])}</p>
-          <p>{temperatures[index]}°C</p>
+          <p className="text-blue-300 text-sm">{getDescription(weatherCode[index])}</p>
+          <p className="text-blue-300">{temperatures[index]}°C</p>
         </div>
       ))}
     </div>
