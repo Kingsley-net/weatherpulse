@@ -215,7 +215,7 @@ const getDescription = (code) => {
         >
           <p>{formatTime(time)}</p>
           <div>{getWeatherImage(weatherCode[index], time)}</div>
-          <p>{getDescription(getDescription[index]}</p>
+          <p>{getDescription(weatherCode[index]}</p>
           <p>{temperatures[index]}°C</p>
         </div>
       ))}
