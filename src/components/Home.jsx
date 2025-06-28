@@ -407,7 +407,7 @@ export function Home() {
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
-              <div className="w-full h-1/4 md:h-1/4">
+              <div className="w-full h-32 md:h-1/2">
                 {weatherdata?.hourly && chartData ? (
                   <Line data={chartData} options={chartOptions} />
                 ) : (
