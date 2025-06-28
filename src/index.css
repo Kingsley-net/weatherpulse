@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 .custom-bg{
-background-image: url('./components/images/nes.jpg');
+background-image: url('./components/images/nerl.jpg');
 background-size: cover;
 background-position:center;
 height:100vh;
