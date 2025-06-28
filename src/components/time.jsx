@@ -1,4 +1,4 @@
-export default function Times({ hourlyTimes, temperatures, weatherCode,description }) {
+export default function Times({ hourlyTimes, temperatures, weatherCode, description }) {
   const formatTime = (isoTime) => {
     return new Date(isoTime).toLocaleString('en-US', {
       timeZone: 'America/New_York',
@@ -10,7 +10,7 @@ export default function Times({ hourlyTimes, temperatures, weatherCode,descripti
 
   // === SVG ICONS ===
 
-  const size = 64;
+  const size = 48; // Reduced size for better card fit
 
   const SunnyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
@@ -170,55 +170,52 @@ export default function Times({ hourlyTimes, temperatures, weatherCode,descripti
     }
   };
 
+  const getDescription = (code) => {
+    switch (code) {
+      case 0: return "Sunny";
+      case 1:
+      case 2: return "Partly Cloudy";
+      case 3:
+      case 45:
+      case 48: return "Cloudy";
+      case 51:
+      case 53:
+      case 55:
+      case 61:
+      case 63:
+      case 65:
+      case 80:
+      case 81:
+      case 82: return "Rainy";
+      case 71:
+      case 73:
+      case 75:
+      case 85:
+      case 86: return "Snowy";
+      case 95:
+      case 96:
+      case 99: return "Thunderstorm";
+      default: return "Unknown";
+    }
+  };
 
-const getDescription = (code) => {
-  switch (code) {
-    case 0: return "Sunny";
-    case 1:
-    case 2: return "Partly Cloudy";
-    case 3:
-    case 45:
-    case 48: return "Cloudy";
-    case 51:
-    case 53:
-    case 55:
-    case 61:
-    case 63:
-    case 65:
-    case 80:
-    case 81:
-    case 82: return "Rainy";
-    case 71:
-    case 73:
-    case 75:
-    case 85:
-    case 86: return "Snowy";
-    case 95:
-    case 96:
-    case 99: return "Thunderstorm";
-    default: return "Unknown";
-  }
-};
-
-
-  
-
-  
   if (!Array.isArray(hourlyTimes) || !Array.isArray(temperatures) || !Array.isArray(weatherCode)) {
     return <div className="text-red-500">No weather data available</div>;
   }
 
   return (
-    <div className="flex overflow-scroll">
+    <div className="flex gap-3 overflow-x-scroll scrollbar-hide pb-2">
       {hourlyTimes.map((time, index) => (
         <div
           key={index}
-          className="relative bg-white/40 backdrop-blur-3xl h-30 mr-2 min-w-1/5 rounded-lg text-white flex flex-col items-center justify-around font-bold"
+          className="flex-shrink-0 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl p-3 w-24 h-32 flex flex-col items-center justify-between text-center shadow-lg"
         >
-          <p className="text-sm text-blue-500">{formatTime(time)}</p>
-          <div>{getWeatherImage(weatherCode[index], time)}</div>
-          <p className="text-blue-300 text-sm">{getDescription(weatherCode[index])}</p>
-          <p className="text-blue-300">{temperatures[index]}°C</p>
+          <p className="text-xs font-medium text-blue-100">{formatTime(time)}</p>
+          <div className="flex-1 flex items-center justify-center">
+            {getWeatherImage(weatherCode[index], time)}
+          </div>
+          <p className="text-xs text-blue-200 mb-1">{getDescription(weatherCode[index])}</p>
+          <p className="text-sm font-bold text-white">{temperatures[index]}°C</p>
         </div>
       ))}
     </div>
