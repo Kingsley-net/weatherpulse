@@ -305,7 +305,7 @@ export function Home() {
 
   return (
     // Main container with responsive layout
-    <div className="h-screen w-full custom-bg gap-2 p-2 box-border ">
+    <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden ">
       {/* Sidebar (Desktop only) */}
       <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-xl z-30 border border-white/10">
         {/* Sidebar Icons with hover and click effects */}
@@ -392,7 +392,7 @@ export function Home() {
 
         {/* Main Content Area (Home View - Conditional Rendering) */}
         {active === 'Home' && (
-          <div className="transparent backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 mb-2 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
+          <div className="transparent backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
             <div className="flex-1">
               <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
               {weatherdata?.hourly ? (
@@ -407,7 +407,7 @@ export function Home() {
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
-              <div className="w-full h-32 md:h-1/2">
+              <div className="w-full h-48 md:h-1/2">
                 {weatherdata?.hourly && chartData ? (
                   <Line data={chartData} options={chartOptions} />
                 ) : (
