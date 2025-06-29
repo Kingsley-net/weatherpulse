@@ -1,4 +1,3 @@
-// src/Home.jsx
 import {
   Search,
   House,
@@ -22,7 +21,6 @@ import { Line } from 'react-chartjs-2';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -108,7 +106,7 @@ export function Home() {
 
           try {
             const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_hours,uv_index_max,weather_code&hourly=temperature_2m,weather_code&current_weather=true&timezone=auto`
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
             );
             if (!weatherResponse.ok) throw new Error('Weather API call failed.');
             const weatherData = await weatherResponse.json();
@@ -118,7 +116,7 @@ export function Home() {
             let cityResponse;
             try {
               cityResponse = await fetch(cityUrl, {
-                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' }, // IMPORTANT: Provide a unique User-Agent
+                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
               });
               if (!cityResponse.ok) throw new Error('City lookup API failed.');
             } catch (e) {
@@ -159,12 +157,12 @@ export function Home() {
           setCountryData('Unknown Country');
           setLoading(false);
         },
-        { timeout: 15000, maximumAge: 0, enableHighAccuracy: true } // Geolocation options
+        { timeout: 15000, maximumAge: 0, enableHighAccuracy: true }
       );
     };
 
     getUserLocation();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   // Handles closing map or prediction overlays
   const handleMap = () => setActive('Home');
@@ -172,12 +170,12 @@ export function Home() {
   // Handle city search
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchQuery) return; // Don't search if query is empty
+    if (!searchQuery) return;
     try {
       // Use Nominatim for forward geocoding
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
-        { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } } // IMPORTANT: Provide a unique User-Agent
+        { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } }
       );
       if (!response.ok) throw new Error('City search failed.');
       const data = await response.json();
@@ -189,23 +187,20 @@ export function Home() {
       const newLat = parseFloat(lat);
       const newLon = parseFloat(lon);
 
-      // Update coordinates and city/country for the new location
       setCoordinates({ latitude: newLat, longitude: newLon });
-      // Extract main city name from display_name
       setCityData(display_name.split(',')[0]);
-      setCountryData(display_name.split(',').pop()); // Get the last part (country)
-      setActive('Map'); // Switch to map view after successful search
-      setActiveSearch(false); // Close search overlay
-      setSearchQuery(''); // Clear search query after successful search
+      setCountryData(display_name.split(',').pop());
+      setActive('Map');
+      setActiveSearch(false);
+      setSearchQuery('');
 
-      // Fetch weather for the newly searched location
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_hours,uv_index_max,weather_code&hourly=temperature_2m,weather_code&current_weather=true&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
       );
       if (!weatherResponse.ok) throw new Error('Weather data fetch failed for searched city.');
       const weatherData = await weatherResponse.json();
       setWeatherData(weatherData);
-      setError(''); // Clear any previous errors
+      setError('');
     } catch (error) {
       setError(`Error searching for city: ${error.message}`);
     }
@@ -232,17 +227,17 @@ export function Home() {
       {
         label: 'Temp (°C)',
         data: weatherdata.hourly.temperature_2m.slice(0, 24),
-        borderColor: '#2563eb', // Tailwind's blue-600
-        backgroundColor: 'rgba(30, 58, 138, 0.35)', // A navy blue with opacity for fill
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(30, 58, 138, 0.35)',
         fill: true,
-        tension: 0.4, // Smooth the line
+        tension: 0.4,
       },
     ],
   };
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Allows the chart to fill its container's height
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
@@ -258,7 +253,7 @@ export function Home() {
     scales: {
       x: {
         title: { display: false },
-        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } }, // Limit ticks for smaller screens
+        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } },
       },
       y: {
         title: { display: false },
@@ -281,7 +276,7 @@ export function Home() {
     weatherdata?.current_weather?.windspeed ??
     'N/A';
 
-  // UI logic for hover states (kept as-is based on your request)
+  // UI logic for hover states
   const handleHovering1 = () => setIsHovering(true);
   const handleHoveringOut1 = () => setIsHovering(false);
   const handleHovering2 = () => setIsHovering2(true);
@@ -300,15 +295,13 @@ export function Home() {
   const handleCancel = () => {
     setActiveSearch(false);
     setSearchQuery('');
-    setError(''); // Clear search-related errors
+    setError('');
   };
 
   return (
-    // Main container with responsive layout
     <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden ">
       {/* Sidebar (Desktop only) */}
-      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-xl z-30 border border-white/10">
-        {/* Sidebar Icons with hover and click effects */}
+      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-30">
         <House
           onMouseOver={handleHovering1}
           onMouseOut={handleHoveringOut1}
@@ -392,24 +385,31 @@ export function Home() {
 
         {/* Main Content Area (Home View - Conditional Rendering) */}
         {active === 'Home' && (
-          <div className="transparent backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
-              {weatherdata?.hourly ? (
-                <Times
-                  hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
-                  temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
-                  weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
-                />
-              ) : (
-                <p className="text-red-400 text-sm">No hourly forecast data</p>
-              )}
+          <div className="transparent backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg min-h-[400px]">
+            {/* Today's Forecast */}
+            <div className="flex-1 flex flex-col">
+              <h1 className="text-xl font-bold text-white text-center mb-2">Today's Forecast</h1>
+              <div className="flex-1 flex items-center justify-center">
+                {weatherdata?.hourly ? (
+                  <Times
+                    hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
+                    temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
+                    weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
+                  />
+                ) : (
+                  <p className="text-red-400 text-sm">No hourly forecast data</p>
+                )}
+              </div>
             </div>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
-              <div className="w-full h-48 md:h-1/2">
+
+            {/* Forecast Graph */}
+            <div className="flex-1 flex flex-col">
+              <h1 className="text-xl font-bold text-white text-center mb-2">Forecast Graph</h1>
+              <div className="flex-1 flex items-center justify-center min-h-[260px]">
                 {weatherdata?.hourly && chartData ? (
-                  <Line data={chartData} options={chartOptions} />
+                  <div className="w-full h-[260px] md:h-[340px] lg:h-[420px]">
+                    <Line data={chartData} options={chartOptions} />
+                  </div>
                 ) : (
                   <p className="text-red-400 text-sm">No data for graph</p>
                 )}
