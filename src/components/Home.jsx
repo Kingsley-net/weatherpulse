@@ -5,7 +5,7 @@ import {
   X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import Times from './time'; // Assuming this is your component for hourly forecast display
+import Times from './time'; // Your hourly forecast component
 import { GitGraphIcon } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -77,6 +77,8 @@ export function Home() {
         ),
         temperature_2m: Array.from({ length: 24 }, (_, i) => (15 + i * 0.5).toFixed(1)),
         weather_code: Array.from({ length: 24 }, (_, i) => [0, 1, 2, 3, 51, 61, 71, 73, 95, 96][i % 10]),
+        wind_speed_10m: Array(24).fill(10),
+        wind_direction_10m: Array(24).fill(180),
       },
     };
 
@@ -105,13 +107,14 @@ export function Home() {
           setCoordinates({ latitude, longitude });
 
           try {
+            // --- FULL Open-Meteo URL ---
             const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`
             );
             if (!weatherResponse.ok) throw new Error('Weather API call failed.');
             const weatherData = await weatherResponse.json();
 
-            // Using Nominatim for reverse geocoding
+            // Nominatim for reverse geocoding
             const cityUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
             let cityResponse;
             try {
@@ -144,7 +147,7 @@ export function Home() {
             setError('');
           } catch (error) {
             setError(`Failed to fetch data: ${error.message}`);
-            setWeatherData(fakeData); // Fallback to fake data on error
+            setWeatherData(fakeData);
             setCityData('Unknown City');
             setCountryData('Unknown Country');
             setLoading(false);
@@ -152,7 +155,7 @@ export function Home() {
         },
         (error) => {
           setError(`Location access denied or timed out: ${error.message}`);
-          setWeatherData(fakeData); // Fallback to fake data on geolocation error
+          setWeatherData(fakeData);
           setCityData('Unknown City');
           setCountryData('Unknown Country');
           setLoading(false);
@@ -172,7 +175,7 @@ export function Home() {
     e.preventDefault();
     if (!searchQuery) return;
     try {
-      // Use Nominatim for forward geocoding
+      // Nominatim for forward geocoding
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
         { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } }
@@ -194,8 +197,9 @@ export function Home() {
       setActiveSearch(false);
       setSearchQuery('');
 
+      // --- FULL Open-Meteo URL ---
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`
       );
       if (!weatherResponse.ok) throw new Error('Weather data fetch failed for searched city.');
       const weatherData = await weatherResponse.json();
@@ -401,7 +405,6 @@ export function Home() {
                 )}
               </div>
             </div>
-
             {/* Forecast Graph */}
             <div className="flex-1 flex flex-col">
               <h1 className="text-xl font-bold text-white text-center mb-2">Forecast Graph</h1>
