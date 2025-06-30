@@ -65,16 +65,14 @@ export function Home() {
   useEffect(() => {
     // Fake data for fallback/testing
     const fakeData = {
-      current: {
-        temperature_2m: 15.0,
-        wind_speed_10m: 10,
-        wind_direction_10m: 180,
-        weather_code: 0,
+      current_weather: {
+        temperature: 15.0,
+        windspeed: 10,
+        winddirection: 180,
+        weathercode: 0,
       },
       hourly: {
-        time: Array.from({ length: 24 }, (_, i) =>
-          new Date(Date.UTC(2025, 4, 3, i)).toISOString()
-        ),
+        time: Array.from({ length: 24 }, (_, i) => new Date(Date.UTC(2025, 4, 3, i)).toISOString()),
         temperature_2m: Array.from({ length: 24 }, (_, i) => 15 + i * 0.5),
         weather_code: Array.from({ length: 24 }, (_, i) => [0, 1, 2, 3, 51, 61, 71, 73, 95, 96][i % 10]),
         wind_speed_10m: Array(24).fill(10),
@@ -107,9 +105,9 @@ export function Home() {
           setCoordinates({ latitude, longitude });
 
           try {
-            // --- FULL Open-Meteo URL: fetch current and hourly weather ---
+            // Use correct Open-Meteo API URL and property access
             const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&forecast_days=1&timezone=auto`
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`
             );
             if (!weatherResponse.ok) throw new Error('Weather API call failed.');
             const weatherData = await weatherResponse.json();
@@ -123,7 +121,6 @@ export function Home() {
               });
               if (!cityResponse.ok) throw new Error('City lookup API failed.');
             } catch (e) {
-              // Retry once for Nominatim due to rate limits
               await new Promise((resolve) => setTimeout(resolve, 1000));
               cityResponse = await fetch(cityUrl, {
                 headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
@@ -199,7 +196,7 @@ export function Home() {
 
       // --- FULL Open-Meteo URL for searched city ---
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&forecast_days=1&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&current_weather=true&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`
       );
       if (!weatherResponse.ok) throw new Error('Weather data fetch failed for searched city.');
       const weatherData = await weatherResponse.json();
@@ -268,16 +265,16 @@ export function Home() {
 
   // Helper functions to safely get current weather data
   const getCurrentTemperature = () =>
-    weatherdata?.current?.temperature_2m ??
     weatherdata?.current_weather?.temperature ??
+    weatherdata?.current?.temperature_2m ??
     'N/A';
   const getCurrentWindDirection = () =>
-    weatherdata?.current?.wind_direction_10m ??
     weatherdata?.current_weather?.winddirection ??
+    weatherdata?.current?.wind_direction_10m ??
     'N/A';
   const getCurrentWindSpeed = () =>
-    weatherdata?.current?.wind_speed_10m ??
     weatherdata?.current_weather?.windspeed ??
+    weatherdata?.current?.wind_speed_10m ??
     'N/A';
 
   // UI logic for hover states
