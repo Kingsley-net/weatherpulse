@@ -5,7 +5,7 @@ import {
   X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import Times from './time'; // Your hourly forecast component
+import Times from './time'; // Assuming this is your component for hourly forecast display
 import { GitGraphIcon } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -65,18 +65,18 @@ export function Home() {
   useEffect(() => {
     // Fake data for fallback/testing
     const fakeData = {
-      current_weather: {
-        temperature: 15.0,
-        windspeed: 10,
-        winddirection: 180,
-        weathercode: 0,
+      current: {
+        temperature_2m: 15.0,
+        wind_speed_10m: 10,
+        wind_direction_10m: 180,
+        weather_code: 0,
       },
       hourly: {
-        time: Array.from({ length: 24 }, (_, i) => new Date(Date.UTC(2025, 4, 3, i)).toISOString()),
-        temperature_2m: Array.from({ length: 24 }, (_, i) => 15 + i * 0.5),
+        time: Array.from({ length: 24 }, (_, i) =>
+          new Date(Date.UTC(2025, 4, 3, i)).toISOString()
+        ),
+        temperature_2m: Array.from({ length: 24 }, (_, i) => (15 + i * 0.5).toFixed(1)),
         weather_code: Array.from({ length: 24 }, (_, i) => [0, 1, 2, 3, 51, 61, 71, 73, 95, 96][i % 10]),
-        wind_speed_10m: Array(24).fill(10),
-        wind_direction_10m: Array(24).fill(180),
       },
     };
 
@@ -105,14 +105,13 @@ export function Home() {
           setCoordinates({ latitude, longitude });
 
           try {
-            // Use correct Open-Meteo API URL and property access
             const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
             );
             if (!weatherResponse.ok) throw new Error('Weather API call failed.');
             const weatherData = await weatherResponse.json();
 
-            // Nominatim for reverse geocoding
+            // Using Nominatim for reverse geocoding
             const cityUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
             let cityResponse;
             try {
@@ -121,6 +120,7 @@ export function Home() {
               });
               if (!cityResponse.ok) throw new Error('City lookup API failed.');
             } catch (e) {
+              // Retry once for Nominatim due to rate limits
               await new Promise((resolve) => setTimeout(resolve, 1000));
               cityResponse = await fetch(cityUrl, {
                 headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
@@ -144,7 +144,7 @@ export function Home() {
             setError('');
           } catch (error) {
             setError(`Failed to fetch data: ${error.message}`);
-            setWeatherData(fakeData);
+            setWeatherData(fakeData); // Fallback to fake data on error
             setCityData('Unknown City');
             setCountryData('Unknown Country');
             setLoading(false);
@@ -152,7 +152,7 @@ export function Home() {
         },
         (error) => {
           setError(`Location access denied or timed out: ${error.message}`);
-          setWeatherData(fakeData);
+          setWeatherData(fakeData); // Fallback to fake data on geolocation error
           setCityData('Unknown City');
           setCountryData('Unknown Country');
           setLoading(false);
@@ -172,7 +172,7 @@ export function Home() {
     e.preventDefault();
     if (!searchQuery) return;
     try {
-      // Nominatim for forward geocoding
+      // Use Nominatim for forward geocoding
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
         { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } }
@@ -194,9 +194,8 @@ export function Home() {
       setActiveSearch(false);
       setSearchQuery('');
 
-      // --- FULL Open-Meteo URL for searched city ---
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&current_weather=true&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code&timezone=auto`
       );
       if (!weatherResponse.ok) throw new Error('Weather data fetch failed for searched city.');
       const weatherData = await weatherResponse.json();
@@ -265,16 +264,16 @@ export function Home() {
 
   // Helper functions to safely get current weather data
   const getCurrentTemperature = () =>
-    weatherdata?.current_weather?.temperature ??
     weatherdata?.current?.temperature_2m ??
+    weatherdata?.current_weather?.temperature ??
     'N/A';
   const getCurrentWindDirection = () =>
-    weatherdata?.current_weather?.winddirection ??
     weatherdata?.current?.wind_direction_10m ??
+    weatherdata?.current_weather?.winddirection ??
     'N/A';
   const getCurrentWindSpeed = () =>
-    weatherdata?.current_weather?.windspeed ??
     weatherdata?.current?.wind_speed_10m ??
+    weatherdata?.current_weather?.windspeed ??
     'N/A';
 
   // UI logic for hover states
@@ -302,7 +301,7 @@ export function Home() {
   return (
     <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden ">
       {/* Sidebar (Desktop only) */}
-      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg px-2 z-50">
+      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-30">
         <House
           onMouseOver={handleHovering1}
           onMouseOut={handleHoveringOut1}
@@ -402,6 +401,7 @@ export function Home() {
                 )}
               </div>
             </div>
+
             {/* Forecast Graph */}
             <div className="flex-1 flex flex-col">
               <h1 className="text-xl font-bold text-white text-center mb-2">Forecast Graph</h1>
