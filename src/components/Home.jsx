@@ -75,7 +75,7 @@ export function Home() {
         time: Array.from({ length: 24 }, (_, i) =>
           new Date(Date.UTC(2025, 4, 3, i)).toISOString()
         ),
-        temperature_2m: Array.from({ length: 24 }, (_, i) => (15 + i * 0.5).toFixed(1)),
+        temperature_2m: Array.from({ length: 24 }, (_, i) => 15 + i * 0.5),
         weather_code: Array.from({ length: 24 }, (_, i) => [0, 1, 2, 3, 51, 61, 71, 73, 95, 96][i % 10]),
         wind_speed_10m: Array(24).fill(10),
         wind_direction_10m: Array(24).fill(180),
@@ -107,9 +107,9 @@ export function Home() {
           setCoordinates({ latitude, longitude });
 
           try {
-            // --- FULL Open-Meteo URL ---
+            // --- FULL Open-Meteo URL: fetch current and hourly weather ---
             const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&forecast_days=1&timezone=auto`
             );
             if (!weatherResponse.ok) throw new Error('Weather API call failed.');
             const weatherData = await weatherResponse.json();
@@ -197,9 +197,9 @@ export function Home() {
       setActiveSearch(false);
       setSearchQuery('');
 
-      // --- FULL Open-Meteo URL ---
+      // --- FULL Open-Meteo URL for searched city ---
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,precipitation_sum,precipitation_probability_max,uv_index_max,humidity_2m_max,humidity_2m_min&current_weather=true&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m&forecast_days=1&timezone=auto`
       );
       if (!weatherResponse.ok) throw new Error('Weather data fetch failed for searched city.');
       const weatherData = await weatherResponse.json();
@@ -305,7 +305,7 @@ export function Home() {
   return (
     <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden ">
       {/* Sidebar (Desktop only) */}
-      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-30">
+      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg px-2 z-50">
         <House
           onMouseOver={handleHovering1}
           onMouseOut={handleHoveringOut1}
