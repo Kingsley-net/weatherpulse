@@ -1,4 +1,4 @@
-// src/Home.jsx
+// src/components/Home.jsx
 import {
   Search,
   House,
@@ -6,7 +6,7 @@ import {
   X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import Times from './time'; // Assuming this is your component for hourly forecast display
+import Times from './time'; // Component for hourly forecast display
 import { GitGraphIcon } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -22,7 +22,6 @@ import { Line } from 'react-chartjs-2';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -108,7 +107,7 @@ export function Home() {
 
           try {
             const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_hours,uv_index_max,weather_code&hourly=temperature_2m,weather_code&current_weather=true&timezone=auto`
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weather_code&current_weather=true`,
             );
             if (!weatherResponse.ok) throw new Error('Weather API call failed.');
             const weatherData = await weatherResponse.json();
@@ -118,7 +117,7 @@ export function Home() {
             let cityResponse;
             try {
               cityResponse = await fetch(cityUrl, {
-                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' }, // IMPORTANT: Provide a unique User-Agent
+                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
               });
               if (!cityResponse.ok) throw new Error('City lookup API failed.');
             } catch (e) {
@@ -146,7 +145,7 @@ export function Home() {
             setError('');
           } catch (error) {
             setError(`Failed to fetch data: ${error.message}`);
-            setWeatherData(fakeData); // Fallback to fake data on error
+            setWeatherData(fakeData);
             setCityData('Unknown City');
             setCountryData('Unknown Country');
             setLoading(false);
@@ -154,30 +153,29 @@ export function Home() {
         },
         (error) => {
           setError(`Location access denied or timed out: ${error.message}`);
-          setWeatherData(fakeData); // Fallback to fake data on geolocation error
+          setWeatherData(fakeData);
           setCityData('Unknown City');
           setCountryData('Unknown Country');
           setLoading(false);
         },
-        { timeout: 15000, maximumAge: 0, enableHighAccuracy: true } // Geolocation options
+        { timeout: 15000, maximumAge: 0, enableHighAccuracy: true }
       );
     };
 
     getUserLocation();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
-  // Handles closing map or prediction overlays
+  // Handles closing overlays
   const handleMap = () => setActive('Home');
 
   // Handle city search
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchQuery) return; // Don't search if query is empty
+    if (!searchQuery) return;
     try {
-      // Use Nominatim for forward geocoding
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
-        { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } } // IMPORTANT: Provide a unique User-Agent
+        { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } }
       );
       if (!response.ok) throw new Error('City search failed.');
       const data = await response.json();
@@ -189,23 +187,20 @@ export function Home() {
       const newLat = parseFloat(lat);
       const newLon = parseFloat(lon);
 
-      // Update coordinates and city/country for the new location
       setCoordinates({ latitude: newLat, longitude: newLon });
-      // Extract main city name from display_name
       setCityData(display_name.split(',')[0]);
-      setCountryData(display_name.split(',').pop()); // Get the last part (country)
-      setActive('Map'); // Switch to map view after successful search
-      setActiveSearch(false); // Close search overlay
-      setSearchQuery(''); // Clear search query after successful search
+      setCountryData(display_name.split(',').pop());
+      setActive('Map');
+      setActiveSearch(false);
+      setSearchQuery('');
 
-      // Fetch weather for the newly searched location
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,precipitation_sum,precipitation_hours,uv_index_max,weather_code&hourly=temperature_2m,weather_code&current_weather=true&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&hourly=temperature_2m,weather_code&current_weather=true`
       );
       if (!weatherResponse.ok) throw new Error('Weather data fetch failed for searched city.');
       const weatherData = await weatherResponse.json();
       setWeatherData(weatherData);
-      setError(''); // Clear any previous errors
+      setError('');
     } catch (error) {
       setError(`Error searching for city: ${error.message}`);
     }
@@ -225,24 +220,24 @@ export function Home() {
   const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
 
-  // Chart Data: 24 hours, blue/navy colors
+  // Chart Data
   const chartData = weatherdata?.hourly && {
     labels: weatherdata.hourly.time.slice(0, 24).map((time) => formatTime(time)),
     datasets: [
       {
         label: 'Temp (°C)',
         data: weatherdata.hourly.temperature_2m.slice(0, 24),
-        borderColor: '#2563eb', // Tailwind's blue-600
-        backgroundColor: 'rgba(30, 58, 138, 0.35)', // A navy blue with opacity for fill
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(30, 58, 138, 0.35)',
         fill: true,
-        tension: 0.4, // Smooth the line
+        tension: 0.4,
       },
     ],
   };
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Allows the chart to fill its container's height
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
@@ -258,7 +253,7 @@ export function Home() {
     scales: {
       x: {
         title: { display: false },
-        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } }, // Limit ticks for smaller screens
+        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } },
       },
       y: {
         title: { display: false },
@@ -267,7 +262,7 @@ export function Home() {
     },
   };
 
-  // Helper functions to safely get current weather data
+  // Helpers to get weather
   const getCurrentTemperature = () =>
     weatherdata?.current?.temperature_2m ??
     weatherdata?.current_weather?.temperature ??
@@ -281,7 +276,7 @@ export function Home() {
     weatherdata?.current_weather?.windspeed ??
     'N/A';
 
-  // UI logic for hover states (kept as-is based on your request)
+  // Hover handlers
   const handleHovering1 = () => setIsHovering(true);
   const handleHoveringOut1 = () => setIsHovering(false);
   const handleHovering2 = () => setIsHovering2(true);
@@ -291,250 +286,258 @@ export function Home() {
   const handleHovering7 = () => setIsHovering7(true);
   const handleHoveringOut7 = () => setIsHovering7(false);
 
-  // Function to open search overlay
+  // Open/close search overlay
   const searching = (e) => {
     e.preventDefault();
     setActiveSearch(true);
   };
-  // Function to close search overlay and clear query/errors
   const handleCancel = () => {
     setActiveSearch(false);
     setSearchQuery('');
-    setError(''); // Clear search-related errors
+    setError('');
   };
 
   return (
-    // Main container with responsive layout
     <div className="h-screen w-full custom-bg gap-2 p-2 box-border ">
-    <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden ">
-      {/* Sidebar (Desktop only) */}
-      <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-xl z-30 border border-white/10">
-        {/* Sidebar Icons with hover and click effects */}
-        <House
-          onMouseOver={handleHovering1}
-          onMouseOut={handleHoveringOut1}
-          onClick={() => setActive('Home')}
-          className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
-        />
-        {isHovering && (
-          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Home</p>
-        )}
-        <MapPin
-          onMouseOver={handleHovering2}
-          onMouseOut={handleHoveringOut2}
-          onClick={() => setActive('Map')}
-          className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
-        />
-        {isHovering2 && (
-          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Map</p>
-        )}
-        <GitGraphIcon
-          onMouseOver={handleHovering5}
-          onMouseOut={handleHoveringOut5}
-          onClick={() => setActive('Predict')}
-          className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
-        />
-        {isHovering5 && (
-          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Predict</p>
-        )}
-        <Search
-          onMouseOver={handleHovering7}
-          onMouseOut={handleHoveringOut7}
-          onClick={searching}
-          className="w-5 h-5 hover:scale-125 transition-transform hover:text-red-400 mt-auto"
-        />
-        {isHovering7 && (
-          <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Search</p>
-        )}
-      </div>
-
-      {/* Main content area with responsive padding */}
-      <div className="h-full w-full md:pl-10 flex flex-col">
-        {/* Header/Weather Info Card */}
-        <div className="transparent backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <p className="font-bold text-base">WEATHERPULSE</p>
-            <p className="text-base font-semibold">
-              {dayOfWeek}, {day} {month}, {year}
-            </p>
+      <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden ">
+        {/* Sidebar (Desktop only) */}
+        <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-50">
+          {/* Sidebar Icons with hover and click effects */}
+          <div className="relative">
+            <House
+              onMouseOver={handleHovering1}
+              onMouseOut={handleHoveringOut1}
+              onClick={() => setActive('Home')}
+              className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
+            />
+            {isHovering && (
+              <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Home</p>
+            )}
           </div>
-          {weatherdata && !error ? (
-            <div className="flex flex-col items-center">
-              <div className="flex items-center mb-2">
-                <MapPin className="text-xl" />
-                <div className="ml-2">
-                  <p className="text-xl font-bold">{cityData || 'Loading...'}</p>
-                  <p className="text-sm">{countryData || 'Loading...'}</p>
-                </div>
-              </div>
-              <p className="text-blue-500 font-bold text-4xl">
-                {getCurrentTemperature()}°C
-              </p>
-              <p className="text-sm">Temperature</p>
-              <div className="flex justify-around w-full mt-2">
-                <div>
-                  <p className="text-blue-700 font-bold text-xl">
-                    {getCurrentWindDirection()}°
-                  </p>
-                  <p className="text-xs">Wind Direction</p>
-                </div>
-                <div>
-                  <p className="text-blue-500 font-bold text-xl">
-                    {getCurrentWindSpeed()}Km/h
-                  </p>
-                  <p className="text-xs">Wind Speed</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-red-400 text-center text-sm">{error || 'No data available'}</div>
-          )}
+          <div className="relative">
+            <MapPin
+              onMouseOver={handleHovering2}
+              onMouseOut={handleHoveringOut2}
+              onClick={() => setActive('Map')}
+              className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
+            />
+            {isHovering2 && (
+              <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Map</p>
+            )}
+          </div>
+          <div className="relative">
+            <GitGraphIcon
+              onMouseOver={handleHovering5}
+              onMouseOut={handleHoveringOut5}
+              onClick={() => setActive('Predict')}
+              className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
+            />
+            {isHovering5 && (
+              <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Predict</p>
+            )}
+          </div>
+          <div className="relative mt-auto">
+            <Search
+              onMouseOver={handleHovering7}
+              onMouseOut={handleHoveringOut7}
+              onClick={searching}
+              className="w-5 h-5 hover:scale-125 transition-transform hover:text-red-400"
+            />
+            {isHovering7 && (
+              <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Search</p>
+            )}
+          </div>
         </div>
 
-        {/* Main Content Area (Home View - Conditional Rendering) */}
-        {active === 'Home' && (
-          <div className="transparent backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 mb-2 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
-          <div className="transparent backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
-              {weatherdata?.hourly ? (
-                <Times
-                  hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
-                  temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
-                  weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
-                />
-              ) : (
-                <p className="text-red-400 text-sm">No hourly forecast data</p>
-              )}
+        {/* Main content area */}
+        <div className="h-full w-full md:pl-10 flex flex-col">
+          {/* Header/Weather Info Card */}
+          <div className="transparent backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-bold text-base">WEATHERPULSE</p>
+              <p className="text-base font-semibold">
+                {dayOfWeek}, {day} {month}, {year}
+              </p>
             </div>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
-              <div className="w-full h-32 md:h-1/2">
-              <div className="w-full h-48 md:h-1/2">
-                {weatherdata?.hourly && chartData ? (
-                  <Line data={chartData} options={chartOptions} />
+            {weatherdata && !error ? (
+              <div className="flex flex-col items-center">
+                <div className="flex items-center mb-2">
+                  <MapPin className="text-xl" />
+                  <div className="ml-2">
+                    <p className="text-xl font-bold">{cityData || 'Loading...'}</p>
+                    <p className="text-sm">{countryData || 'Loading...'}</p>
+                  </div>
+                </div>
+                <p className="text-blue-500 font-bold text-4xl">
+                  {getCurrentTemperature()}°C
+                </p>
+                <p className="text-sm">Temperature</p>
+                <div className="flex justify-around w-full mt-2">
+                  <div>
+                    <p className="text-blue-700 font-bold text-xl">
+                      {getCurrentWindDirection()}°
+                    </p>
+                    <p className="text-xs">Wind Direction</p>
+                  </div>
+                  <div>
+                    <p className="text-blue-500 font-bold text-xl">
+                      {getCurrentWindSpeed()}Km/h
+                    </p>
+                    <p className="text-xs">Wind Speed</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-red-400 text-center text-sm">{error || 'No data available'}</div>
+            )}
+          </div>
+
+          {/* Main Content Area (Home View) */}
+          {active === 'Home' && (
+            <div className="transparent backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
+              <div className="flex-1">
+                <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
+                {weatherdata?.hourly ? (
+                  <Times
+                    hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
+                    temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
+                    weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
+                  />
                 ) : (
-                  <p className="text-red-400 text-sm">No data for graph</p>
+                  <p className="text-red-400 text-sm">No hourly forecast data</p>
                 )}
               </div>
+              <div className="flex-1">
+                <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
+                <div className="w-full h-48 md:h-1/2">
+                  {weatherdata?.hourly && chartData ? (
+                    <Line data={chartData} options={chartOptions} />
+                  ) : (
+                    <p className="text-red-400 text-sm">No data for graph</p>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
 
-      {/* Footer - Mobile Bottom Navigation (Hidden on MD screens and up) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 shadow-3xl backdrop-blur-xl rounded-t-xl h-auto flex bg-blue-400/20 justify-around items-center z-40 border-t border-white/10">
-        {navItems.map((nav) => (
-          <button
-            key={nav.id}
-            onClick={() => setActive(nav.id)}
-            className={`relative flex flex-col font-bold items-center justify-center py-2 px-3 transition-all duration-200
-              ${active === nav.id ? 'text-blue-300 font-bold scale-110 drop-shadow-lg' : 'opacity-80 text-white'}`}
-          >
-            <p>{nav.icons}</p>
-            <p className="text-xs mt-1">{nav.label}</p>
-          </button>
-        ))}
-        <button
-          onClick={searching}
-          className="flex flex-col items-center justify-center font-bold py-2 px-3 transition-all duration-200 opacity-80 text-white focus:text-yellow-300"
-        >
-          <Search />
-          <p className="text-xs mt-1">Search</p>
-        </button>
-      </div>
-
-      {/* Map Overlay (Conditional Rendering) */}
-      {active === 'Map' && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/70 backdrop-blur-2xl">
-          <button className="absolute top-4 right-4 text-white bg-white/10 p-2 rounded-full backdrop-blur-md" onClick={handleMap}>
-            <X />
-          </button>
-          <h1 className="text-xl font-bold text-white mb-2">Map</h1>
-          {coordinates ? (
-            <div className="w-full h-full md:w-4/5 md:h-4/5 rounded-xl overflow-hidden border-2 border-white/20">
-              <MapContainer
-                center={[coordinates.latitude, coordinates.longitude]}
-                zoom={13}
-                style={{ height: '100%', width: '100%' }}
+          {/* Footer - Mobile Bottom Navigation */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 shadow-3xl backdrop-blur-xl rounded-t-xl h-auto flex bg-blue-400/20 justify-around items-center z-40 border-t border-white/10">
+            {navItems.map((nav) => (
+              <button
+                key={nav.id}
+                onClick={() => setActive(nav.id)}
+                className={`relative flex flex-col font-bold items-center justify-center py-2 px-3 transition-all duration-200
+                  ${active === nav.id ? 'text-blue-300 font-bold scale-110 drop-shadow-lg' : 'opacity-80 text-white'}`}
               >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                <Marker position={[coordinates.latitude, coordinates.longitude]}>
-                  <Popup>{cityData || 'Your Location'}</Popup>
-                </Marker>
-              </MapContainer>
+                <p>{nav.icons}</p>
+                <p className="text-xs mt-1">{nav.label}</p>
+              </button>
+            ))}
+            <button
+              onClick={searching}
+              className="flex flex-col items-center justify-center font-bold py-2 px-3 transition-all duration-200 opacity-80 text-white focus:text-yellow-300"
+            >
+              <Search />
+              <p className="text-xs mt-1">Search</p>
+            </button>
+          </div>
+
+          {/* Map Overlay */}
+          {active === 'Map' && (
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/70 backdrop-blur-2xl">
+              <button className="absolute top-4 right-4 text-white bg-white/10 p-2 rounded-full backdrop-blur-md" onClick={handleMap}>
+                <X />
+              </button>
+              <h1 className="text-xl font-bold text-white mb-2">Map</h1>
+              {coordinates ? (
+                <div className="w-full h-full md:w-4/5 md:h-4/5 rounded-xl overflow-hidden border-2 border-white/20">
+                  <MapContainer
+                    center={[coordinates.latitude, coordinates.longitude]}
+                    zoom={13}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    <Marker position={[coordinates.latitude, coordinates.longitude]}>
+                      <Popup>{cityData || 'Your Location'}</Popup>
+                    </Marker>
+                  </MapContainer>
+                </div>
+              ) : (
+                <p className="text-red-400 text-sm">Map loading or coordinates unavailable</p>
+              )}
             </div>
-          ) : (
-            <p className="text-red-400 text-sm">Map loading or coordinates unavailable</p>
+          )}
+
+          {/* Predict Overlay */}
+          {active === 'Predict' && (
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-xl">
+              <button className="absolute top-4 right-4 text-white bg-white/10 p-2 rounded-full backdrop-blur-md" onClick={handleMap}>
+                <X />
+              </button>
+              <h1 className="text-2xl font-bold text-white">Predict</h1>
+              <p className="text-sm text-white">Prediction feature not yet implemented.</p>
+            </div>
+          )}
+
+          {/* Search Overlay */}
+          {activeSearch && (
+            <div className="fixed inset-0 z-50 flex flex-col justify-center items-center bg-gray-950/70 backdrop-blur-xl">
+              <form onSubmit={handleSearch} className="w-4/5 max-w-md flex items-center">
+                <input
+                  type="search"
+                  placeholder="Search city or postal code"
+                  className="text-white w-full bg-white/20 border border-white/30 p-3 rounded-xl backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="ml-2 text-white font-bold bg-blue-500/70 hover:bg-blue-500/90 border border-white/30 p-3 rounded-xl backdrop-blur-md transition-colors"
+                >
+                  Search
+                </button>
+              </form>
+              <button
+                className="text-white font-bold absolute top-4 right-4 rounded-full bg-white/10 p-2 border border-white/30 backdrop-blur-md"
+                onClick={handleCancel}
+              >
+                <X />
+              </button>
+              {error && (
+                <div className="mt-4 text-red-400 text-center text-sm">{error}</div>
+              )}
+            </div>
+          )}
+
+          {/* Weather-like Loading Overlay */}
+          {loading && (
+            <div className="fixed inset-0 flex justify-center items-center bg-gray-950/70 backdrop-blur-2xl z-50">
+              <div className="flex flex-col items-center">
+                <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-cloud-move">
+                  <ellipse cx="60" cy="55" rx="35" ry="18" fill="#dbeafe" />
+                  <ellipse cx="45" cy="45" rx="20" ry="15" fill="#bae6fd" />
+                  <ellipse cx="80" cy="45" rx="24" ry="16" fill="#a5b4fc" />
+                  <ellipse cx="70" cy="60" rx="32" ry="13" fill="#e0e7ff" />
+                </svg>
+                <span className="mt-4 text-blue-100 text-center text-2xl font-extrabold tracking-wide animate-pulse">Loading Weather data please wait...</span>
+              </div>
+              <style>{`
+                @keyframes cloud-move {
+                  0% { transform: translateX(0); }
+                  50% { transform: translateX(10px); }
+                  100% { transform: translateX(0); }
+                }
+                .animate-cloud-move {
+                  animation: cloud-move 2.2s ease-in-out infinite;
+                }
+              `}</style>
+            </div>
           )}
         </div>
-      )}
-
-      {/* Predict Overlay (Conditional Rendering) */}
-      {active === 'Predict' && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-xl">
-          <button className="absolute top-4 right-4 text-white bg-white/10 p-2 rounded-full backdrop-blur-md" onClick={handleMap}>
-            <X />
-          </button>
-          <h1 className="text-2xl font-bold text-white">Predict</h1>
-          <p className="text-sm text-white">Prediction feature not yet implemented.</p>
-        </div>
-      )}
-
-      {/* Search Overlay (Conditional Rendering) */}
-      {activeSearch && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-center items-center bg-gray-950/70 backdrop-blur-xl">
-          <form onSubmit={handleSearch} className="w-4/5 max-w-md flex items-center">
-            <input
-              type="search"
-              placeholder="Search city or postal code"
-              className="text-white w-full bg-white/20 border border-white/30 p-3 rounded-xl backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button
-              type="submit"
-              className="ml-2 text-white font-bold bg-blue-500/70 hover:bg-blue-500/90 border border-white/30 p-3 rounded-xl backdrop-blur-md transition-colors"
-            >
-              Search
-            </button>
-          </form>
-          <button
-            className="text-white font-bold absolute top-4 right-4 rounded-full bg-white/10 p-2 border border-white/30 backdrop-blur-md"
-            onClick={handleCancel}
-          >
-            <X />
-          </button>
-        </div>
-      )}
-
-      {/* Weather-like Loading Overlay (Conditional Rendering) */}
-      {loading && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gray-950/70 backdrop-blur-2xl z-50">
-          <div className="flex flex-col items-center">
-            <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-cloud-move">
-              <ellipse cx="60" cy="55" rx="35" ry="18" fill="#dbeafe" />
-              <ellipse cx="45" cy="45" rx="20" ry="15" fill="#bae6fd" />
-              <ellipse cx="80" cy="45" rx="24" ry="16" fill="#a5b4fc" />
-              <ellipse cx="70" cy="60" rx="32" ry="13" fill="#e0e7ff" />
-            </svg>
-            <span className="mt-4 text-blue-100 text-center text-2xl font-extrabold tracking-wide animate-pulse">Loading Weather data please wait...</span>
-          </div>
-          <style>{`
-            @keyframes cloud-move {
-              0% { transform: translateX(0); }
-              50% { transform: translateX(10px); }
-              100% { transform: translateX(0); }
-            }
-            .animate-cloud-move {
-              animation: cloud-move 2.2s ease-in-out infinite;
-            }
-          `}</style>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
