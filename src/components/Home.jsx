@@ -352,7 +352,7 @@ export function Home() {
         {/* Main content area */}
         <div className="h-full w-full md:pl-10 flex flex-col">
           {/* Header/Weather Info Card */}
-          <div className="transparent backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
+          <div className="transparent backdrop-blur-md rounded-xl p-2 border border-white/10 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <p className="font-bold text-base">WEATHERPULSE</p>
               <p className="text-base font-semibold">
