@@ -3,10 +3,32 @@
     "name" : "WeatherPulse",
     "icons" :[
         {
-            "src" : "/",
+            "src" : "/weather64x64.png",
             "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-         
-        }
-    ]
+            "type": "image/png"
+        },
+        {
+            "src" : "/weather128x128.png",
+             "sizes": "128x128",
+            "type": "image/png"
+        },
+        {
+            "src" : "/weather512x512.png",
+             "sizes": "512x512",
+            "type": "image/png"
+        },
+         {
+      "src": "/weather512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+
+    ],
+    "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#667EEA",
+  "background_color": "#ffffff",
+  "description": "Get real weather forecst from WeatherPulse",
+  "orientation": "portrait"
 }

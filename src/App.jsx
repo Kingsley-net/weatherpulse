@@ -3,6 +3,7 @@ import {BrowserRouter as Router, Routes, Route,Navigate} from 'react-router-dom'
 import { Welcome } from './components/welcome';
 
 import { UseMobile } from './components/mobile';
+import InstallButton from './InstallButton';
 function App() {
   const isMobile = UseMobile()
   return (
@@ -15,6 +16,7 @@ function App() {
   </Routes>
 
 </Router>
+<InstallButton />
 
     </>
   )
