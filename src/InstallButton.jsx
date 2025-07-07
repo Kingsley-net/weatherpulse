@@ -25,12 +25,11 @@ function InstallButton() {
   if (!isVisible) return null
 
   return (
-    <div className='absolute top-0 w-full h-100'><button
+    <div className='fixed bottom-4  w-full h-100'><div><p>You can install this app and add to your home screen</p></div><div><button className='bg-blue-700 text-white px-4 py-2 rounded-xl shadow-lg'>Cancle</button><button
       onClick={handleInstall}
-      className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-xl shadow-lg"
-    >
-    Please Install App
-    </button></div>
+      className="right-4 bg-blue-700 text-white px-4 py-2 rounded-xl shadow-lg"
+    >Install
+    </button></div></div>
   )
 }
 
