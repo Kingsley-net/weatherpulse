@@ -25,12 +25,12 @@ function InstallButton() {
   if (!isVisible) return null
 
   return (
-    <button
+    <div className='absolute top-0 w-full h-100'><button
       onClick={handleInstall}
       className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-xl shadow-lg"
     >
-      Install App
-    </button>
+    Please Install App
+    </button></div>
   )
 }
 
