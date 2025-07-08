@@ -301,7 +301,7 @@ export function Home() {
     <div className="h-screen w-full custom-bg gap-2 p-2 box-border ">
       <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden ">
         {/* Sidebar (Desktop only) */}
-        <div className="hidden md:flex md:h-4/5 fixed left-2 top-1/2 transform -translate-y-1/2 bg-gray-950/40 backdrop-blur-xl rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-50">
+        <div className="hidden md:flex md:h-4/5 p-4 fixed left-2 top-1/2 transform -translate-y-1/2 bg-transparent backdrop-blur-md rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-50">
           {/* Sidebar Icons with hover and click effects */}
           <div className="relative">
             <House
@@ -352,7 +352,7 @@ export function Home() {
         {/* Main content area */}
         <div className="h-full w-full md:pl-10 flex flex-col">
           {/* Header/Weather Info Card */}
-          <div className="transparent backdrop-blur-md rounded-xl p-2 border border-white/10 shadow-lg">
+          <div className="transparent  rounded-xl p-2 border border-white/10 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <p className="font-bold text-base">WEATHERPULSE</p>
               <p className="text-base font-semibold">
