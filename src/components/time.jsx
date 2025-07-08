@@ -1,4 +1,4 @@
-export default function Times({ hourlyTimes, temperatures, weatherCode, getDescription }) {
+export default function Times({ hourlyTimes, temperatures, weatherCode, description }) {
   const formatTime = (isoTime) => {
     return new Date(isoTime).toLocaleString('en-US', {
       timeZone: 'America/New_York',
