@@ -371,8 +371,8 @@ export function Home() {
                 <p className="text-blue-500 font-bold text-4xl">
                   {getCurrentTemperature()}°C
                 </p>
-                <p className="text-sm">{<Times weatherCode={                     weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
-}/>}</p>
+                <p className="text-xs text-blue-200 mb-1">{getDescription(weatherCode[index])}</p>
+
                 <div className="flex justify-around w-full mt-2">
                   <div>
                     <p className="text-blue-700 font-bold text-xl">
