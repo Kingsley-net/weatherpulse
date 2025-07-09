@@ -298,42 +298,12 @@ export function Home() {
   };
 
 
-const getDescriptionForHome = (code) => {
-  switch (code) {
-    case 0: return "Sunny";
-    case 1:
-    case 2: return "Partly Cloudy";
-    case 3:
-    case 45:
-    case 48: return "Cloudy";
-    case 51:
-    case 53:
-    case 55:
-    case 61:
-    case 63:
-    case 65:
-    case 80:
-    case 81:
-    case 82: return "Rainy";
-    case 71:
-    case 73:
-    case 75:
-    case 85:
-    case 86: return "Snowy";
-    case 95:
-    case 96:
-    case 99: return "Thunderstorm";
-    default: return "Unknown";
-  }
-};
 
 
 
 
-  const hourlyDescriptions = weatherdata?.hourly?.weather_code
-    ? weatherdata.hourly.weather_code.slice(0, 24).map(code => getDescriptionForHome(code))
-    : []; 
 
+ 
   return (
     <div className=" w-full custom-bg gap-2 p-2 box-border ">
       <div className="h-full w-full custom-bg gap-2 p-2 box-border  ">
