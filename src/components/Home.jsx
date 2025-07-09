@@ -431,7 +431,7 @@ const getDescriptionForHome = (code) => {
 
           {/* Main Content Area (Home View) */}
           {active === 'Home' && (
-            <div className="transparent backdrop-blur-lg rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
+            <div className="transparent  rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
               <div className="flex-1">
                 <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
                 {weatherdata?.hourly ? (
