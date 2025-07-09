@@ -305,7 +305,7 @@ export function Home() {
 
  
   return (
-    <div className=" w-full custom-bg gap-2 p-2 box-border ">
+    <div className=" w-full h-screen custom-bg gap-2 p-2 box-border ">
       <div className="h-full  w-full custom-bg gap-2 p-2 box-border  ">
         {/* Sidebar (Desktop only) */}
         <div className="hidden md:flex md:h-4/5 p-4 fixed left-2 top-1/2 transform -translate-y-1/2 bg-transparent backdrop-blur-md rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-50">
