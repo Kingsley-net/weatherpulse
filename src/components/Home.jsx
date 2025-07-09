@@ -335,8 +335,8 @@ const getDescriptionForHome = (code) => {
     : []; 
 
   return (
-    <div className="h-screen w-full custom-bg gap-2 p-2 box-border ">
-      <div className="h-full w-full custom-bg gap-2 p-2 box-border overflow-hidden ">
+    <div className=" w-full custom-bg gap-2 p-2 box-border ">
+      <div className="h-full w-full custom-bg gap-2 p-2 box-border  ">
         {/* Sidebar (Desktop only) */}
         <div className="hidden md:flex md:h-4/5 p-4 fixed left-2 top-1/2 transform -translate-y-1/2 bg-transparent backdrop-blur-md rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-50">
           {/* Sidebar Icons with hover and click effects */}
@@ -439,7 +439,7 @@ const getDescriptionForHome = (code) => {
                     hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
                     temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
                     weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
-                     description={hourlyDescriptions}/>
+                     />
                 ) : (
                   <p className="text-red-400 text-sm">No hourly forecast data</p>
                 )}
