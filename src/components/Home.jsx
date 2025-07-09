@@ -306,7 +306,7 @@ export function Home() {
  
   return (
     <div className=" w-full custom-bg gap-2 p-2 box-border ">
-      <div className="h-full w-full custom-bg gap-2 p-2 box-border  ">
+      <div className="h-full  w-full custom-bg gap-2 p-2 box-border  ">
         {/* Sidebar (Desktop only) */}
         <div className="hidden md:flex md:h-4/5 p-4 fixed left-2 top-1/2 transform -translate-y-1/2 bg-transparent backdrop-blur-md rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-50">
           {/* Sidebar Icons with hover and click effects */}
@@ -401,7 +401,7 @@ export function Home() {
 
           {/* Main Content Area (Home View) */}
           {active === 'Home' && (
-            <div className="transparent  rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
+            <div className="bg-transparent  rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
               <div className="flex-1">
                 <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
                 {weatherdata?.hourly ? (
