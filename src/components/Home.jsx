@@ -330,7 +330,7 @@ export function Home() {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-slate-100 overflow-hidden relative">
+    <div className="w-full min-h-screen custoom-bg text-slate-100 overflow-hidden relative">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"></div>
@@ -399,8 +399,7 @@ export function Home() {
                     </div>
                     <div className="text-right">
                       <p className="text-slate-300">{currentDate.fullDate}</p>
-                      <p className="text-sm text-slate-500">{weatherdata?.current_weather && getDescription(weatherdata.current_weather.weathercode)}</p>
-                    </div>
+                      </div>
                   </div>
 
                   {weatherdata?.current_weather ? (
@@ -425,7 +424,8 @@ export function Home() {
                         <div className="text-center mt-4">
                           <p className="text-5xl font-bold">
                             {weatherdata.current_weather.temperature.toFixed(1)}°
-                          </p>
+                          </p><p className="text-md font-bold text-slate-500">{weatherdata?.current_weather && getDescription(weatherdata.current_weather.weathercode)}</p>
+                    
                           <p className="text-slate-400">Feels like {weatherdata.current_weather.temperature.toFixed(1)}°</p>
                         </div>
                       </div>
