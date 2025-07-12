@@ -1,4 +1,17 @@
- export const isNight = (isoTime) => {
+
+export default function Times({ hourlyTimes, temperatures, weatherCode, getWeatherImage, getDescription }) {
+  const formatTime = (isoTime) => {
+    return new Date(isoTime).toLocaleString('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
+
+
+const isNight = (isoTime) => {
     try {
       const date = new Date(isoTime);
       const hour = parseInt(date.toLocaleString('en-US', {
@@ -11,8 +24,7 @@
       return false;
     }
   };
-
-  export const getWeatherImage = (code, time) => {
+const getWeatherImage = (code, time) => {
     const night = isNight(time);
     switch (code) {
       case 0: return <SunnyIcon />;
@@ -42,7 +54,7 @@
     }
   };
 
-  export const getDescription = (code) => {
+ const getDescription = (code) => {
     switch (code) {
       case 0: return "Sunny";
       case 1:
@@ -70,15 +82,7 @@
       default: return "Unknown";
     }
   };
-export default function Times({ hourlyTimes, temperatures, weatherCode, d41escription }) {
-  const formatTime = (isoTime) => {
-    return new Date(isoTime).toLocaleString('en-US', {
-      timeZone: 'America/New_York',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
+
 
   // === SVG ICONS ===
 
