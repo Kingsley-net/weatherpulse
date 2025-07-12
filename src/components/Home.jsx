@@ -409,12 +409,7 @@ export function Home() {
                       {/* Main Weather Display */}
                       <div className="flex flex-col items-center justify-center">
                         <div className="relative">
-                          <div className="w-32 h-32 flex items-center justify-center">
-                            {getWeatherImage(
-                              weatherdata.current_weather.weathercode,
-                              weatherdata.current_weather.time
-                            )}
-                          </div>
+                          
                           <div className="absolute -bottom-2 -right-2 bg-slate-700/80 backdrop-blur-sm rounded-full p-2 border border-slate-600/50 shadow-md">
                             <WeatherIcon 
                               code={weatherdata.current_weather.weathercode} 
@@ -426,7 +421,7 @@ export function Home() {
                         <div className="text-center mt-4">
                           <p className="text-5xl font-bold">
                             {weatherdata.current_weather.temperature.toFixed(1)}°
-                          </p><p className="text-md font-bold text-slate-500">{weatherdata?.current_weather && getDescription(weatherdata.current_weather.weathercode)}</p>
+                          </p><p className="text-md font-bold text-slate-800">{weatherdata?.current_weather && getDescription(weatherdata.current_weather.weathercode)}</p>
                     
                           <p className="text-slate-400">Feels like {weatherdata.current_weather.temperature.toFixed(1)}°</p>
                         </div>
