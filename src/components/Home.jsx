@@ -330,7 +330,7 @@ export function Home() {
   ];
 
   return (
-    <div className="w-full min-h-screen custoom-bg text-slate-100 overflow-hidden relative">
+    <div className="w-full min-h-screen custom-bg text-slate-100 overflow-hidden relative">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"></div>
