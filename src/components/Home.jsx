@@ -6,7 +6,8 @@ import {
   X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import Times from './time'; // Component for hourly forecast display
+// Import the Times component as default, and the named exports (utilities)
+import Times, { getWeatherImage, getDescription } from './time';
 import { GitGraphIcon } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -78,7 +79,7 @@ export function Home() {
         ),
         temperature_2m: Array.from({ length: 24 }, (_, i) => (15 + i * 0.5).toFixed(1)),
         weather_code: Array.from({ length: 24 }, (_, i) => [0, 1, 2, 3, 51, 61, 71, 73, 95, 96][i % 10]),
-        
+
       },
     };
 
@@ -276,6 +277,17 @@ export function Home() {
     weatherdata?.current?.wind_speed_10m ??
     weatherdata?.current_weather?.windspeed ??
     'N/A';
+  // --- New: Get current weather code and time for icon/description ---
+  const getCurrentWeatherCode = () =>
+    weatherdata?.current?.weather_code ??
+    weatherdata?.current_weather?.weathercode ??
+    null;
+  const getCurrentTime = () =>
+    weatherdata?.current?.time ??
+    weatherdata?.current_weather?.time ??
+    null;
+  // -----------------------------------------------------------------
+
 
   // Hover handlers
   const handleHovering1 = () => setIsHovering(true);
@@ -299,12 +311,6 @@ export function Home() {
   };
 
 
-
-
-
-
-
- 
   return (
     <div className=" w-full h-screen custom-bg gap-2 p-2 box-border ">
       <div className="h-full  w-full custom-bg gap-2 p-2 box-border  ">
@@ -376,11 +382,20 @@ export function Home() {
                     <p className="text-sm">{countryData || 'Loading...'}</p>
                   </div>
                 </div>
-            {
-              weatherdata?.hourly?(
-                <Times/> ): (<p></p>
-              )
-            }
+
+                {/* --- New: Display Weather Icon and Description --- */}
+                {weatherdata?.current && (
+                  <div className="flex flex-col items-center mb-2">
+                    <div className="w-16 h-16">
+                      {getWeatherImage(getCurrentWeatherCode(), getCurrentTime())}
+                    </div>
+                    <p className="text-lg font-semibold text-blue-200">
+                      {getDescription(getCurrentWeatherCode())}
+                    </p>
+                  </div>
+                )}
+                {/* ------------------------------------------------ */}
+
                 <p className="text-blue-500 font-bold text-4xl">
                   {getCurrentTemperature()}°C
                 </p>
