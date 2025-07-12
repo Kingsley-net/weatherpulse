@@ -140,7 +140,7 @@ export default function Times({ hourlyTimes, temperatures, weatherCode, d41escri
     }
   };
 
-  const getWeatherImage = (code, time) => {
+  export const getWeatherImage = (code, time) => {
     const night = isNight(time);
     switch (code) {
       case 0: return <SunnyIcon />;
@@ -170,7 +170,7 @@ export default function Times({ hourlyTimes, temperatures, weatherCode, d41escri
     }
   };
 
-  const getDescription = (code) => {
+  export const getDescription = (code) => {
     switch (code) {
       case 0: return "Sunny";
       case 1:
