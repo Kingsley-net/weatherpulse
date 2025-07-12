@@ -16,7 +16,7 @@ function App() {
   </Routes>
 
 </Router>
-<InstallButton />
+{location.pathname === '/' && <InstallButton />}
 
     </>
   )
