@@ -330,7 +330,7 @@ export function Home() {
   ];
 
   return (
-    <div className="w-full min-h-screen custom-bg text-slate-100 overflow-hidden relative">
+    <div className="w-full min-h-screen custom-bg text-slate-100  relative">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"></div>
@@ -392,7 +392,7 @@ export function Home() {
                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full filter blur-xl"></div>
                 
                 <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-6">
+                  <div className="flex justify-between w-full items-start mb-6">
                     
                     <div className='flex'>
                       <MapPin className='text-slate-400 text-md font-bold '/>
