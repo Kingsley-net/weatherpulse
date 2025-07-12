@@ -146,9 +146,16 @@ export default function Home() {
     }
   };
 
+  // Defensive values for weather data
+  const temperature = weather.data?.current_weather?.temperature ?? '--';
+  const windspeed = weather.data?.current_weather?.windspeed ?? '--';
+  const winddirection = weather.data?.current_weather?.winddirection ?? '--';
+  const weathercode = weather.data?.current_weather?.weathercode ?? 0;
+  const weatherTime = weather.data?.current_weather?.time ?? new Date().toISOString();
+
   // Chart data
   const chartData = useMemo(() => {
-    if (!weather.data?.hourly?.time.length) return null;
+    if (!weather.data?.hourly?.time?.length) return null;
 
     return {
       labels: weather.data.hourly.time
@@ -202,19 +209,19 @@ export default function Home() {
     {
       icon: <Thermometer size={20} />,
       label: 'Feels Like',
-      value: `${weather.data.current_weather.temperature}°C`
+      value: `${temperature}°C`
     },
     {
       icon: <Wind size={20} />,
       label: 'Wind',
-      value: `${weather.data.current_weather.windspeed} km/h`
+      value: `${windspeed} km/h`
     },
     {
       icon: <Navigation size={20} style={{ 
-        transform: `rotate(${weather.data.current_weather.winddirection}deg)` 
+        transform: `rotate(${winddirection}deg)` 
       }} />,
       label: 'Direction',
-      value: `${weather.data.current_weather.winddirection}°`
+      value: `${winddirection}°`
     },
     {
       icon: <Droplet size={20} />,
@@ -222,6 +229,9 @@ export default function Home() {
       value: '65%' // Would come from API if available
     }
   ];
+
+  // Debug weather object in console
+  console.log(weather);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
@@ -256,8 +266,8 @@ export default function Home() {
         <div className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 rounded-2xl p-6 mb-6 shadow-xl backdrop-blur-sm border border-gray-700">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
-              <h2 className="text-2xl font-bold">{weather.location.city}</h2>
-              <p className="text-gray-300">{weather.location.country}</p>
+              <h2 className="text-2xl font-bold">{weather.location.city ?? 'Unknown'}</h2>
+              <p className="text-gray-300">{weather.location.country ?? ''}</p>
               <p className="text-sm text-gray-400 mt-1">
                 {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
               </p>
@@ -266,18 +276,15 @@ export default function Home() {
             <div className="flex items-center mt-4 md:mt-0">
               <div className="text-center mr-6">
                 <div className="text-5xl font-bold">
-                  {weather.data.current_weather.temperature}°C
+                  {temperature}°C
                 </div>
                 <div className="text-lg capitalize">
-                  {getDescription(weather.data.current_weather.weathercode)}
+                  {getDescription(weathercode)}
                 </div>
               </div>
               
               <div className="w-24 h-24">
-                {getWeatherImage(
-                  weather.data.current_weather.weathercode,
-                  weather.data.current_weather.time
-                )}
+                {getWeatherImage(weathercode, weatherTime)}
               </div>
             </div>
           </div>
@@ -301,7 +308,7 @@ export default function Home() {
         {/* Hourly Forecast */}
         <div className="bg-gray-800/50 rounded-2xl p-6 mb-6 shadow-xl backdrop-blur-sm border border-gray-700">
           <h3 className="text-lg font-semibold mb-4">Hourly Forecast</h3>
-          {weather.data.hourly.time.length > 0 ? (
+          {weather.data?.hourly?.time?.length > 0 ? (
             <Times
               hourlyTimes={weather.data.hourly.time.slice(0, 24)}
               temperatures={weather.data.hourly.temperature_2m.slice(0, 24)}
@@ -338,7 +345,7 @@ export default function Home() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               />
               <Marker position={[weather.location.coordinates.latitude, weather.location.coordinates.longitude]}>
-                <Popup>{weather.location.city}</Popup>
+                <Popup>{weather.location.city ?? "Current Location"}</Popup>
               </Marker>
             </MapContainer>
           </div>
