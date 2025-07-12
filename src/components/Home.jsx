@@ -78,6 +78,7 @@ export function Home() {
         ),
         temperature_2m: Array.from({ length: 24 }, (_, i) => (15 + i * 0.5).toFixed(1)),
         weather_code: Array.from({ length: 24 }, (_, i) => [0, 1, 2, 3, 51, 61, 71, 73, 95, 96][i % 10]),
+        
       },
     };
 
@@ -375,6 +376,11 @@ export function Home() {
                     <p className="text-sm">{countryData || 'Loading...'}</p>
                   </div>
                 </div>
+            {
+              weatherdata?.hourly?(
+                <Times/> ): (<p></p>
+              )
+            }
                 <p className="text-blue-500 font-bold text-4xl">
                   {getCurrentTemperature()}°C
                 </p>
