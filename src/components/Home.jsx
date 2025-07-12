@@ -8,6 +8,7 @@ import {
 import { useEffect, useState } from 'react';
 // Import the Times component as default, and the named exports (utilities)
 import Times from './time';
+import { getWeatherImage, getDescription } from './unity';
 import { GitGraphIcon } from 'lucide-react';
 import {
   Chart as ChartJS,

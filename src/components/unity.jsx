@@ -1,17 +1,4 @@
-import { getWeatherImage, getDescription } from './unity';
-export default function Times({ hourlyTimes, temperatures, weatherCode }) {
-  const formatTime = (isoTime) => {
-    return new Date(isoTime).toLocaleString('en-US', {
-      timeZone: 'America/New_York',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
-
-
-
-const isNight = (isoTime) => {
+export const isNight = (isoTime) => {
     try {
       const date = new Date(isoTime);
       const hour = parseInt(date.toLocaleString('en-US', {
@@ -24,7 +11,7 @@ const isNight = (isoTime) => {
       return false;
     }
   };
-const getWeatherImage = (code, time) => {
+export const getWeatherImage = (code, time) => {
     const night = isNight(time);
     switch (code) {
       case 0: return <SunnyIcon />;
@@ -54,7 +41,7 @@ const getWeatherImage = (code, time) => {
     }
   };
 
- const getDescription = (code) => {
+export const getDescription = (code) => {
     switch (code) {
       case 0: return "Sunny";
       case 1:
@@ -88,7 +75,7 @@ const getWeatherImage = (code, time) => {
 
   const size = 48; // Reduced size for better card fit
 
-  const SunnyIcon = () => (
+export const SunnyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <g stroke="#FFA500" strokeWidth="3" strokeLinecap="round">
         <line x1="50" y1="10" x2="50" y2="20" />
@@ -105,7 +92,7 @@ const getWeatherImage = (code, time) => {
     </svg>
   );
 
-  const CloudyIcon = () => (
+  export const CloudyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <defs>
         <linearGradient id="cloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -120,7 +107,7 @@ const getWeatherImage = (code, time) => {
     </svg>
   );
 
-  const RainyIcon = () => (
+export const RainyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <defs>
         <linearGradient id="rainCloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -143,7 +130,7 @@ const getWeatherImage = (code, time) => {
     </svg>
   );
 
-  const SnowyIcon = () => (
+ export const SnowyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <defs>
         <linearGradient id="snowCloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -166,7 +153,7 @@ const getWeatherImage = (code, time) => {
     </svg>
   );
 
-  const ThunderstormIcon = () => (
+ export const ThunderstormIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <defs>
         <linearGradient id="stormCloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -183,7 +170,7 @@ const getWeatherImage = (code, time) => {
     </svg>
   );
 
-  const PartlyCloudyIcon = () => (
+ export  const PartlyCloudyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <defs>
         <linearGradient id="partlyCloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -199,27 +186,3 @@ const getWeatherImage = (code, time) => {
       <ellipse cx="55" cy="55" rx="25" ry="10" fill="url(#partlyCloudGradient)" stroke="#A0C4E0" strokeWidth="1" />
     </svg>
   );
-
-
-  if (!Array.isArray(hourlyTimes) || !Array.isArray(temperatures) || !Array.isArray(weatherCode)) {
-    return <div className="text-red-500">No weather data available</div>;
-  }
-
-  return (
-    <div className="flex gap-3 overflow-x-scroll scrollbar-hide pb-2">
-      {hourlyTimes.map((time, index) => (
-        <div
-          key={index}
-          className="flex-shrink-0 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl p-3 w-24 h-32 flex flex-col items-center justify-between text-center shadow-lg"
-        >
-          <p className="text-xs font-medium text-blue-100">{formatTime(time)}</p>
-          <div className="flex-1 flex items-center justify-center">
-            {getWeatherImage(weatherCode[index], time)}
-          </div>
-          <p className="text-xs text-blue-200 mb-1">{getDescription(weatherCode[index])}</p>
-          <p className="text-sm font-bold text-white">{temperatures[index]}°C</p>
-        </div>
-      ))}
-    </div>
-  );
-}
