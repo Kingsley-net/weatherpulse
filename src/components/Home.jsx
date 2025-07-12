@@ -359,7 +359,7 @@ export function Home() {
         {/* Main content area */}
         <div className="h-full w-full md:pl-10 flex flex-col">
           {/* Header/Weather Info Card */}
-          <div className="transparent  rounded-xl p-2 border border-white/10 shadow-lg">
+          <div className="backdrop-filter backdrop-blur-md  rounded-xl p-2 border border-white/10 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <p className="font-bold text-base">WEATHERPULSE</p>
               <p className="text-base font-semibold">
@@ -401,7 +401,7 @@ export function Home() {
 
           {/* Main Content Area (Home View) */}
           {active === 'Home' && (
-            <div className="bg-transparent  rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
+            <div className="bg-transparent backdrop-filter backdrop-blur-md rounded-xl p-4 overflow-hidden mt-2 flex-1 flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
               <div className="flex-1">
                 <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
                 {weatherdata?.hourly ? (
