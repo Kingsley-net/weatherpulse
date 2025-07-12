@@ -11,12 +11,13 @@ export const isNight = (isoTime) => {
       return false;
     }
   };
+
 export const getWeatherImage = (code, time) => {
     const night = isNight(time);
     switch (code) {
-      case 0: return <SunnyIcon />;
+      case 0: return night ? <MoonIcon /> : <SunnyIcon />;
       case 1:
-      case 2: return <PartlyCloudyIcon />;
+      case 2: return night ? <PartlyCloudyNightIcon /> : <PartlyCloudyIcon />;
       case 3:
       case 45:
       case 48: return <CloudyIcon />;
@@ -43,7 +44,7 @@ export const getWeatherImage = (code, time) => {
 
 export const getDescription = (code) => {
     switch (code) {
-      case 0: return "Sunny";
+      case 0: return "Clear";
       case 1:
       case 2: return "Partly Cloudy";
       case 3:
@@ -70,10 +71,9 @@ export const getDescription = (code) => {
     }
   };
 
+// === SVG ICONS ===
 
-  // === SVG ICONS ===
-
-  const size = 48; // Reduced size for better card fit
+const size = 48; // Reduced size for better card fit
 
 export const SunnyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
@@ -92,7 +92,23 @@ export const SunnyIcon = () => (
     </svg>
   );
 
-  export const CloudyIcon = () => (
+export const MoonIcon = () => (
+    <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="moonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#F0F8FF" />
+          <stop offset="100%" stopColor="#C0C0C0" />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="20" fill="url(#moonGradient)" stroke="#A9A9A9" strokeWidth="2" />
+      <circle cx="45" cy="45" r="3" fill="#D3D3D3" opacity="0.7" />
+      <circle cx="55" cy="40" r="2" fill="#D3D3D3" opacity="0.7" />
+      <circle cx="60" cy="55" r="2.5" fill="#D3D3D3" opacity="0.7" />
+      <circle cx="40" cy="55" r="1.5" fill="#D3D3D3" opacity="0.7" />
+    </svg>
+  );
+
+export const CloudyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <defs>
         <linearGradient id="cloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -130,7 +146,7 @@ export const RainyIcon = () => (
     </svg>
   );
 
- export const SnowyIcon = () => (
+export const SnowyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <defs>
         <linearGradient id="snowCloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -153,7 +169,7 @@ export const RainyIcon = () => (
     </svg>
   );
 
- export const ThunderstormIcon = () => (
+export const ThunderstormIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <defs>
         <linearGradient id="stormCloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -170,7 +186,7 @@ export const RainyIcon = () => (
     </svg>
   );
 
- export  const PartlyCloudyIcon = () => (
+export const PartlyCloudyIcon = () => (
     <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
       <defs>
         <linearGradient id="partlyCloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -184,5 +200,27 @@ export const RainyIcon = () => (
       <ellipse cx="45" cy="50" rx="15" ry="10" fill="url(#partlyCloudGradient)" stroke="#A0C4E0" strokeWidth="1" />
       <ellipse cx="65" cy="50" rx="15" ry="10" fill="url(#partlyCloudGradient)" stroke="#A0C4E0" strokeWidth="1" />
       <ellipse cx="55" cy="55" rx="25" ry="10" fill="url(#partlyCloudGradient)" stroke="#A0C4E0" strokeWidth="1" />
+    </svg>
+  );
+
+export const PartlyCloudyNightIcon = () => (
+    <svg width={size} height={size} viewBox="0 0 100 100" className="drop-shadow-lg">
+      <defs>
+        <linearGradient id="partlyCloudNightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#E6F3FF" />
+          <stop offset="100%" stopColor="#B8D4F0" />
+        </linearGradient>
+        <linearGradient id="nightMoonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#F0F8FF" />
+          <stop offset="100%" stopColor="#C0C0C0" />
+        </linearGradient>
+      </defs>
+      <circle cx="35" cy="35" r="12" fill="url(#nightMoonGradient)" stroke="#A9A9A9" strokeWidth="1" />
+      <circle cx="32" cy="32" r="2" fill="#D3D3D3" opacity="0.7" />
+      <circle cx="38" cy="30" r="1.5" fill="#D3D3D3" opacity="0.7" />
+      <ellipse cx="55" cy="45" rx="20" ry="12" fill="url(#partlyCloudNightGradient)" stroke="#A0C4E0" strokeWidth="1" />
+      <ellipse cx="45" cy="50" rx="15" ry="10" fill="url(#partlyCloudNightGradient)" stroke="#A0C4E0" strokeWidth="1" />
+      <ellipse cx="65" cy="50" rx="15" ry="10" fill="url(#partlyCloudNightGradient)" stroke="#A0C4E0" strokeWidth="1" />
+      <ellipse cx="55" cy="55" rx="25" ry="10" fill="url(#partlyCloudNightGradient)" stroke="#A0C4E0" strokeWidth="1" />
     </svg>
   );
