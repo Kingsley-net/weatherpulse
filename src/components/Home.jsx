@@ -392,9 +392,9 @@ export function Home() {
                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full filter blur-xl"></div>
                 
                 <div className="relative z-10">
-                  <div className="flex justify-between w-full items-start mb-6">
+                  <div className="flex items-center justify-between w-full items-start mb-6">
                     
-                    <div className='flex'>
+                    <div className='flex items-center'>
                       <MapPin className='text-slate-400 text-md font-bold '/>
                      <div> <h2 className="text-2xl font-bold">{cityData}</h2>
                       <p className="text-slate-400">{countryData}</p>
