@@ -1,4 +1,4 @@
-import { Search, House, MapPin, X } from 'lucide-react';
+import { Search, House, MapPin, X, Droplet, Wind, Sun, Cloud, CloudRain, CloudSnow, Zap } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import Times from './time';
 import { getWeatherImage, getDescription } from './unity';
@@ -37,11 +37,44 @@ ChartJS.register(
   Legend
 );
 
+const WeatherIcon = ({ code, time, size = 24 }) => {
+  const isDay = new Date(time).getHours() > 6 && new Date(time).getHours() < 18;
+  
+  const icons = {
+    0: <Sun size={size} className="text-yellow-400" />, // Clear sky
+    1: <Sun size={size} className="text-yellow-400" />, // Mainly clear
+    2: <Cloud size={size} className="text-gray-300" />, // Partly cloudy
+    3: <Cloud size={size} className="text-gray-400" />, // Overcast
+    45: <Cloud size={size} className="text-gray-500" />, // Fog
+    48: <Cloud size={size} className="text-gray-500" />, // Fog
+    51: <CloudRain size={size} className="text-blue-300" />, // Drizzle
+    53: <CloudRain size={size} className="text-blue-400" />, // Drizzle
+    55: <CloudRain size={size} className="text-blue-500" />, // Drizzle
+    56: <CloudRain size={size} className="text-blue-300" />, // Freezing drizzle
+    57: <CloudRain size={size} className="text-blue-400" />, // Freezing drizzle
+    61: <CloudRain size={size} className="text-blue-400" />, // Rain
+    63: <CloudRain size={size} className="text-blue-500" />, // Rain
+    65: <CloudRain size={size} className="text-blue-600" />, // Rain
+    66: <CloudRain size={size} className="text-blue-300" />, // Freezing rain
+    67: <CloudRain size={size} className="text-blue-400" />, // Freezing rain
+    71: <CloudSnow size={size} className="text-blue-200" />, // Snow
+    73: <CloudSnow size={size} className="text-blue-300" />, // Snow
+    75: <CloudSnow size={size} className="text-blue-400" />, // Snow
+    77: <CloudSnow size={size} className="text-blue-300" />, // Snow grains
+    80: <CloudRain size={size} className="text-blue-400" />, // Rain showers
+    81: <CloudRain size={size} className="text-blue-500" />, // Rain showers
+    82: <CloudRain size={size} className="text-blue-600" />, // Rain showers
+    85: <CloudSnow size={size} className="text-blue-300" />, // Snow showers
+    86: <CloudSnow size={size} className="text-blue-400" />, // Snow showers
+    95: <Zap size={size} className="text-yellow-500" />, // Thunderstorm
+    96: <Zap size={size} className="text-yellow-500" />, // Thunderstorm with hail
+    99: <Zap size={size} className="text-yellow-600" />, // Thunderstorm with hail
+  };
+
+  return icons[code] || <Sun size={size} className={isDay ? "text-yellow-400" : "text-gray-400"} />;
+};
+
 export function Home() {
-  const [isHovering, setIsHovering] = useState(false);
-  const [isHovering2, setIsHovering2] = useState(false);
-  const [isHovering5, setIsHovering5] = useState(false);
-  const [isHovering7, setIsHovering7] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [weatherdata, setWeatherData] = useState(null);
@@ -51,6 +84,7 @@ export function Home() {
   const [active, setActive] = useState('Home');
   const [activeSearch, setActiveSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDay, setSelectedDay] = useState(0); // For 5-day forecast
 
   // Current date display
   const currentDate = useMemo(() => {
@@ -58,9 +92,26 @@ export function Home() {
     return {
       day: date.getDate(),
       dayOfWeek: date.toLocaleString('en-US', { weekday: 'short' }),
-      month: date.toLocaleString('en-US', { month: 'long' }),
-      year: date.getFullYear()
+      month: date.toLocaleString('en-US', { month: 'short' }),
+      year: date.getFullYear(),
+      fullDate: date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
     };
+  }, []);
+
+  // Generate 5-day forecast dates
+  const forecastDates = useMemo(() => {
+    const dates = [];
+    for (let i = 0; i < 5; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+      dates.push({
+        day: date.getDate(),
+        dayOfWeek: date.toLocaleString('en-US', { weekday: 'short' }),
+        month: date.toLocaleString('en-US', { month: 'short' }),
+        dateObj: date
+      });
+    }
+    return dates;
   }, []);
 
   // Format time for chart
@@ -77,10 +128,14 @@ export function Home() {
       labels: weatherdata.hourly.time.slice(0, 24).map(formatTime),
       datasets: [
         {
-          label: 'Temp (°C)',
+          label: 'Temperature (°C)',
           data: weatherdata.hourly.temperature_2m.slice(0, 24),
-          borderColor: '#2563eb',
-          backgroundColor: 'rgba(30, 58, 138, 0.35)',
+          borderColor: '#60a5fa',
+          backgroundColor: 'rgba(96, 165, 250, 0.2)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#93c5fd',
+          pointBorderColor: '#60a5fa',
           fill: true,
           tension: 0.4,
         },
@@ -93,24 +148,49 @@ export function Home() {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
-        labels: { color: 'white', font: { size: 10 } },
+        display: false
       },
-      title: {
-        display: true,
-        text: 'Hourly Temp',
-        color: 'white',
-        font: { size: 12 },
-      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        titleColor: '#e2e8f0',
+        bodyColor: '#e2e8f0',
+        borderColor: '#1e293b',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: false,
+        callbacks: {
+          label: (context) => {
+            return `${context.dataset.label}: ${context.raw}°C`;
+          }
+        }
+      }
     },
     scales: {
       x: {
-        title: { display: false },
-        ticks: { color: 'white', maxTicksLimit: 6, font: { size: 10 } },
+        grid: {
+          display: false,
+          drawBorder: false
+        },
+        ticks: { 
+          color: '#94a3b8',
+          font: {
+            size: 10
+          }
+        },
       },
       y: {
-        title: { display: false },
-        ticks: { color: 'white', font: { size: 10 } },
+        grid: {
+          color: 'rgba(148, 163, 184, 0.1)',
+          drawBorder: false
+        },
+        ticks: { 
+          color: '#94a3b8',
+          font: {
+            size: 10
+          },
+          callback: (value) => `${value}°`
+        },
       },
     },
   };
@@ -132,7 +212,7 @@ export function Home() {
 
         // Fetch weather data
         const weatherResponse = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weather_code&current_weather=true`
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weather_code&current_weather=true&daily=weather_code,temperature_2m_max,temperature_2m_min`
         );
         const weatherData = await weatherResponse.json();
 
@@ -176,6 +256,20 @@ export function Home() {
             weather_code: Array.from({ length: 24 }, (_, i) => 
               [0, 1, 2, 3][i % 4]
             )
+          },
+          daily: {
+            time: Array.from({ length: 5 }, (_, i) => 
+              new Date(Date.now() + i * 86400000).toISOString()
+            ),
+            temperature_2m_max: Array.from({ length: 5 }, (_, i) => 
+              22 + Math.sin(i) * 3
+            ),
+            temperature_2m_min: Array.from({ length: 5 }, (_, i) => 
+              15 + Math.sin(i) * 2
+            ),
+            weather_code: Array.from({ length: 5 }, (_, i) => 
+              [0, 1, 2, 3, 1][i]
+            )
           }
         });
         setCityData('Sample City');
@@ -216,7 +310,7 @@ export function Home() {
 
       // Fetch new weather data
       const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newCoords.latitude}&longitude=${newCoords.longitude}&hourly=temperature_2m,weather_code&current_weather=true`
+        `https://api.open-meteo.com/v1/forecast?latitude=${newCoords.latitude}&longitude=${newCoords.longitude}&hourly=temperature_2m,weather_code&current_weather=true&daily=weather_code,temperature_2m_max,temperature_2m_min`
       );
       setWeatherData(await weatherResponse.json());
       setError('');
@@ -236,213 +330,397 @@ export function Home() {
   ];
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-blue-900 to-blue-950 overflow-hidden p-2">
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex fixed left-2 top-1/2 transform -translate-y-1/2 bg-white/10 backdrop-blur-md rounded-xl p-3 flex-col items-center space-y-4 z-10">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActive(item.id)}
-            className={`p-2 rounded-lg transition-all ${active === item.id ? 'bg-white/20' : 'hover:bg-white/10'}`}
-            aria-label={item.label}
-          >
-            {item.icon}
-          </button>
-        ))}
-        <button 
-          onClick={() => setActiveSearch(true)}
-          className="p-2 rounded-lg hover:bg-white/10"
-          aria-label="Search"
-        >
-          <Search size={20} />
-        </button>
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-slate-100 overflow-hidden relative">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full filter blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full filter blur-3xl"></div>
       </div>
 
       {/* Main Content */}
-      <div className="h-full w-full md:pl-14 flex flex-col space-y-3 overflow-y-auto">
-        {/* Weather Card */}
-        <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
-          <div className="flex justify-between items-center mb-3">
-            <h1 className="font-bold text-lg">WEATHERPULSE</h1>
-            <p className="text-sm">
-              {currentDate.dayOfWeek}, {currentDate.day} {currentDate.month}, {currentDate.year}
-            </p>
+      <div className="relative z-10 h-full w-full flex flex-col md:flex-row">
+        {/* Desktop Sidebar */}
+        <div className="hidden md:flex w-20 h-screen bg-slate-800/50 backdrop-blur-lg border-r border-slate-700/50 flex-col items-center py-8 space-y-8">
+          <div className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            WP
           </div>
+          
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActive(item.id)}
+              className={`p-3 rounded-xl transition-all ${active === item.id ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg shadow-blue-500/10' : 'hover:bg-slate-700/50 text-slate-300'}`}
+              aria-label={item.label}
+            >
+              {item.icon}
+            </button>
+          ))}
+          
+          <div className="flex-1"></div>
+          
+          <button 
+            onClick={() => setActiveSearch(true)}
+            className="p-3 rounded-xl hover:bg-slate-700/50 text-slate-300"
+            aria-label="Search"
+          >
+            <Search size={20} />
+          </button>
+        </div>
 
-          {weatherdata?.current_weather ? (
-            <div className="flex flex-col items-center">
-              {/* Location */}
-              <div className="flex items-center mb-3">
-                <MapPin className="mr-2" />
-                <div>
-                  <p className="font-bold">{cityData}</p>
-                  <p className="text-sm opacity-80">{countryData}</p>
-                </div>
-              </div>
+        {/* Mobile Header */}
+        <div className="md:hidden flex justify-between items-center p-4 bg-slate-800/50 backdrop-blur-lg border-b border-slate-700/50">
+          <div className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            WEATHERPULSE
+          </div>
+          <button 
+            onClick={() => setActiveSearch(true)}
+            className="p-2 rounded-lg hover:bg-slate-700/50 text-slate-300"
+          >
+            <Search size={20} />
+          </button>
+        </div>
 
-              {/* Weather Icon and Description */}
-              <div className="flex flex-col items-center my-2">
-                <div className="w-16 h-16">
-                  {getWeatherImage(
-                    weatherdata.current_weather.weathercode,
-                    weatherdata.current_weather.time
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          {active === 'Home' && (
+            <div className="space-y-6">
+              {/* Current Weather Card */}
+              <div className="bg-slate-800/50 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-xl overflow-hidden relative">
+                {/* Decorative elements */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full filter blur-xl"></div>
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full filter blur-xl"></div>
+                
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h2 className="text-2xl font-bold">{cityData}</h2>
+                      <p className="text-slate-400">{countryData}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-slate-300">{currentDate.fullDate}</p>
+                      <p className="text-sm text-slate-500">{weatherdata?.current_weather && getDescription(weatherdata.current_weather.weathercode)}</p>
+                    </div>
+                  </div>
+
+                  {weatherdata?.current_weather ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {/* Main Weather Display */}
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="relative">
+                          <div className="w-32 h-32 flex items-center justify-center">
+                            {getWeatherImage(
+                              weatherdata.current_weather.weathercode,
+                              weatherdata.current_weather.time
+                            )}
+                          </div>
+                          <div className="absolute -bottom-2 -right-2 bg-slate-700/80 backdrop-blur-sm rounded-full p-2 border border-slate-600/50 shadow-md">
+                            <WeatherIcon 
+                              code={weatherdata.current_weather.weathercode} 
+                              time={weatherdata.current_weather.time} 
+                              size={20} 
+                            />
+                          </div>
+                        </div>
+                        <div className="text-center mt-4">
+                          <p className="text-5xl font-bold">
+                            {weatherdata.current_weather.temperature.toFixed(1)}°
+                          </p>
+                          <p className="text-slate-400">Feels like {weatherdata.current_weather.temperature.toFixed(1)}°</p>
+                        </div>
+                      </div>
+
+                      {/* Weather Details */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-slate-700/30 backdrop-blur-sm rounded-xl p-4 border border-slate-600/30 flex items-center space-x-3">
+                          <div className="bg-blue-500/20 p-2 rounded-lg">
+                            <Wind size={20} className="text-blue-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-400">Wind</p>
+                            <p className="font-semibold">{weatherdata.current_weather.windspeed} km/h</p>
+                          </div>
+                        </div>
+                        <div className="bg-slate-700/30 backdrop-blur-sm rounded-xl p-4 border border-slate-600/30 flex items-center space-x-3">
+                          <div className="bg-purple-500/20 p-2 rounded-lg">
+                            <Droplet size={20} className="text-purple-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-400">Humidity</p>
+                            <p className="font-semibold">65%</p>
+                          </div>
+                        </div>
+                        <div className="bg-slate-700/30 backdrop-blur-sm rounded-xl p-4 border border-slate-600/30 flex items-center space-x-3">
+                          <div className="bg-amber-500/20 p-2 rounded-lg">
+                            <Wind size={20} className="text-amber-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-400">Direction</p>
+                            <p className="font-semibold">{weatherdata.current_weather.winddirection}°</p>
+                          </div>
+                        </div>
+                        <div className="bg-slate-700/30 backdrop-blur-sm rounded-xl p-4 border border-slate-600/30 flex items-center space-x-3">
+                          <div className="bg-emerald-500/20 p-2 rounded-lg">
+                            <Sun size={20} className="text-emerald-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-400">UV Index</p>
+                            <p className="font-semibold">3.5</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Hourly Forecast Summary */}
+                      <div className="bg-slate-700/40 backdrop-blur-sm rounded-xl p-4 border border-slate-600/30">
+                        <h3 className="font-medium mb-3 text-slate-300">Today's Forecast</h3>
+                        <div className="flex space-x-4 overflow-x-auto pb-2">
+                          {weatherdata?.hourly?.time.slice(0, 12).map((time, i) => (
+                            <div key={i} className="flex flex-col items-center min-w-[50px]">
+                              <p className="text-xs text-slate-400">{formatTime(time)}</p>
+                              <div className="my-1">
+                                <WeatherIcon 
+                                  code={weatherdata.hourly.weather_code[i]} 
+                                  time={time} 
+                                  size={20} 
+                                />
+                              </div>
+                              <p className="text-sm font-medium">
+                                {weatherdata.hourly.temperature_2m[i]}°
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      {error || 'Loading weather data...'}
+                    </div>
                   )}
                 </div>
-                <p className="text-lg font-semibold text-blue-200 mt-1">
-                  {getDescription(weatherdata.current_weather.weathercode)}
-                </p>
               </div>
 
-              {/* Temperature */}
-              <p className="text-4xl font-bold my-2">
-                {weatherdata.current_weather.temperature.toFixed(1)}°C
-              </p>
-
-              {/* Wind Info */}
-              <div className="flex justify-around w-full mt-3">
-                <div className="text-center">
-                  <p className="font-bold">
-                    {weatherdata.current_weather.winddirection}°
-                  </p>
-                  <p className="text-xs opacity-80">Wind Direction</p>
+              {/* 5-Day Forecast */}
+              <div className="bg-slate-800/50 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-xl">
+                <h3 className="font-bold text-lg mb-4">5-Day Forecast</h3>
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  {forecastDates.map((date, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedDay(i)}
+                      className={`p-3 rounded-xl transition-all ${selectedDay === i ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-slate-700/30 hover:bg-slate-700/50 border border-slate-600/30'}`}
+                    >
+                      <div className="flex flex-col items-center">
+                        <p className="text-sm font-medium">
+                          {i === 0 ? 'Today' : date.dayOfWeek}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {date.day} {date.month}
+                        </p>
+                        <div className="my-2">
+                          {weatherdata?.daily && (
+                            <WeatherIcon 
+                              code={weatherdata.daily.weather_code[i]} 
+                              time={date.dateObj.toISOString()} 
+                              size={24} 
+                            />
+                          )}
+                        </div>
+                        {weatherdata?.daily && (
+                          <div className="flex space-x-2">
+                            <p className="text-sm font-semibold">
+                              {weatherdata.daily.temperature_2m_max[i]}°
+                            </p>
+                            <p className="text-sm text-slate-400">
+                              {weatherdata.daily.temperature_2m_min[i]}°
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <div className="text-center">
-                  <p className="font-bold">
-                    {weatherdata.current_weather.windspeed} km/h
-                  </p>
-                  <p className="text-xs opacity-80">Wind Speed</p>
+              </div>
+
+              {/* Charts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Temperature Chart */}
+                <div className="bg-slate-800/50 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-xl">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold">Temperature</h3>
+                    <div className="flex space-x-2">
+                      <button className="text-xs px-2 py-1 bg-slate-700/50 rounded-lg">24h</button>
+                      <button className="text-xs px-2 py-1 bg-slate-700/20 rounded-lg">Week</button>
+                    </div>
+                  </div>
+                  <div className="h-64">
+                    {chartData ? (
+                      <Line data={chartData} options={chartOptions} />
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-slate-500">
+                        No chart data available
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Hourly Forecast */}
+                <div className="bg-slate-800/50 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-xl">
+                  <h3 className="font-bold mb-4">Hourly Forecast</h3>
+                  {weatherdata?.hourly ? (
+                    <Times
+                      hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
+                      temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
+                      weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-slate-500">
+                      No hourly data available
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="text-center py-4">
-              {error || 'Loading weather data...'}
+          )}
+
+          {/* Map View */}
+          {active === 'Map' && coordinates && (
+            <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-48px)] bg-slate-800/50 backdrop-blur-md rounded-2xl overflow-hidden border border-slate-700/50 shadow-xl">
+              <MapContainer
+                center={[coordinates.latitude, coordinates.longitude]}
+                zoom={12}
+                style={{ height: '100%', width: '100%' }}
+                className="rounded-2xl"
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <Marker position={[coordinates.latitude, coordinates.longitude]}>
+                  <Popup className="font-sans">
+                    <div className="text-sm font-medium">{cityData}</div>
+                    <div className="text-xs text-slate-500">{countryData}</div>
+                    {weatherdata?.current_weather && (
+                      <div className="mt-1 flex items-center">
+                        <WeatherIcon 
+                          code={weatherdata.current_weather.weathercode} 
+                          time={weatherdata.current_weather.time} 
+                          size={16} 
+                          className="mr-1"
+                        />
+                        <span>{weatherdata.current_weather.temperature.toFixed(1)}°C</span>
+                      </div>
+                    )}
+                  </Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+          )}
+
+          {/* Predict View */}
+          {active === 'Predict' && (
+            <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-48px)] flex items-center justify-center bg-slate-800/50 backdrop-blur-md rounded-2xl border border-slate-700/50 shadow-xl">
+              <div className="text-center p-6 max-w-md">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded-2xl mb-6 inline-block">
+                  <GitGraphIcon size={40} className="text-white" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Weather Prediction</h2>
+                <p className="text-slate-400 mb-6">
+                  Our advanced prediction models are coming soon to help you plan better.
+                </p>
+                <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/20">
+                  Notify Me When Ready
+                </button>
+              </div>
             </div>
           )}
         </div>
-
-        {/* Forecast Section */}
-        {active === 'Home' && (
-          <div className="flex-1 flex flex-col md:flex-row gap-3">
-            {/* Hourly Forecast */}
-            <div className="flex-1 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
-              <h2 className="text-lg font-bold mb-3">Hourly Forecast</h2>
-              {weatherdata?.hourly ? (
-                <Times
-                  hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
-                  temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
-                  weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
-                />
-              ) : (
-                <p>No hourly data available</p>
-              )}
-            </div>
-
-            {/* Temperature Chart */}
-            <div className="flex-1 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
-              <h2 className="text-lg font-bold mb-3">Temperature Trend</h2>
-              <div className="h-64">
-                {chartData ? (
-                  <Line data={chartData} options={chartOptions} />
-                ) : (
-                  <p>No chart data available</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Map View */}
-        {active === 'Map' && coordinates && (
-          <div className="flex-1 bg-white/10 backdrop-blur-md rounded-xl overflow-hidden border border-white/10 shadow-lg">
-            <MapContainer
-              center={[coordinates.latitude, coordinates.longitude]}
-              zoom={12}
-              style={{ height: '100%', width: '100%' }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              <Marker position={[coordinates.latitude, coordinates.longitude]}>
-                <Popup>{cityData}</Popup>
-              </Marker>
-            </MapContainer>
-          </div>
-        )}
-
-        {/* Predict View */}
-        {active === 'Predict' && (
-          <div className="flex-1 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shadow-lg">
-            <div className="text-center p-4">
-              <h2 className="text-xl font-bold mb-2">Weather Prediction</h2>
-              <p>This feature is coming soon!</p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-lg border-t border-white/10 flex justify-around py-2 z-10">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-800/80 backdrop-blur-lg border-t border-slate-700/50 flex justify-around py-3 z-20">
         {navItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActive(item.id)}
-            className={`flex flex-col items-center p-2 ${active === item.id ? 'text-blue-300' : 'text-white'}`}
+            className={`flex flex-col items-center p-2 ${active === item.id ? 'text-blue-400' : 'text-slate-300'}`}
           >
-            {item.icon}
+            <div className={`p-2 rounded-lg ${active === item.id ? 'bg-blue-500/20' : ''}`}>
+              {item.icon}
+            </div>
             <span className="text-xs mt-1">{item.label}</span>
           </button>
         ))}
-        <button 
-          onClick={() => setActiveSearch(true)}
-          className="flex flex-col items-center p-2"
-        >
-          <Search size={20} />
-          <span className="text-xs mt-1">Search</span>
-        </button>
       </div>
 
       {/* Search Modal */}
       {activeSearch && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-20 flex items-center justify-center p-4">
-          <div className="bg-white/10 border border-white/20 rounded-xl p-4 w-full max-w-md backdrop-blur-md">
-            <form onSubmit={handleSearch} className="flex space-x-2">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search city..."
-                className="flex-1 bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                autoFocus
-              />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-scale-in">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg">Search Location</h3>
+              <button
+                onClick={() => setActiveSearch(false)}
+                className="p-2 rounded-full hover:bg-slate-700/50 transition-colors"
+                aria-label="Close search"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleSearch} className="mb-4">
+              <div className="relative">
+                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search city or location..."
+                  className="w-full bg-slate-700/50 border border-slate-600/50 rounded-xl pl-10 pr-4 py-3 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                  autoFocus
+                />
+              </div>
               <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                className="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/20"
               >
                 Search
               </button>
             </form>
-            <button
-              onClick={() => setActiveSearch(false)}
-              className="absolute top-4 right-4 text-white hover:text-gray-300"
-              aria-label="Close search"
-            >
-              <X size={24} />
-            </button>
-            {error && <p className="text-red-400 mt-2 text-sm">{error}</p>}
+            {error && (
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+            <div className="mt-4 text-sm text-slate-400">
+              <p>Try searching for:</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {['New York', 'London', 'Tokyo', 'Paris', 'Sydney'].map((city) => (
+                  <button
+                    key={city}
+                    onClick={() => {
+                      setSearchQuery(city);
+                      // Optionally trigger search immediately
+                      // handleSearch({ preventDefault: () => {} });
+                    }}
+                    className="px-3 py-1 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors"
+                  >
+                    {city}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 flex items-center justify-center">
+        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-40 flex items-center justify-center animate-fade-in">
           <div className="text-center">
-            <div className="inline-block animate-pulse">
-              <div className="w-24 h-24 bg-white/20 rounded-full"></div>
+            <div className="inline-flex items-center justify-center">
+              <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
             </div>
-            <p className="mt-4 text-white">Loading weather data...</p>
+            <p className="mt-4 text-slate-300 animate-pulse">Loading weather data...</p>
           </div>
         </div>
       )}
