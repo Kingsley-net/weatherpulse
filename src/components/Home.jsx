@@ -393,10 +393,12 @@ export function Home() {
                 
                 <div className="relative z-10">
                   <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <h2 className="text-2xl font-bold">{cityData}</h2>
+                    
+                    <div className='flex'>
+                      <MapPin className='text-slate-400 p-2 '/>
+                     <div> <h2 className="text-2xl font-bold">{cityData}</h2>
                       <p className="text-slate-400">{countryData}</p>
-                    </div>
+</div></div>
                     <div className="text-right">
                       <p className="text-slate-300">{currentDate.fullDate}</p>
                       </div>
