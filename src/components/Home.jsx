@@ -385,16 +385,19 @@ export function Home() {
                 </div>
 
                 {/* --- New: Display Weather Icon and Description --- */}
-                {weatherdata?.current && (
-                  <div className="flex flex-col items-center mb-2">
-                    <div className="w-16 h-16">
-                      {getWeatherImage(getCurrentWeatherCode(), getCurrentTime())}
-                    </div>
-                    <p className="text-lg font-semibold text-blue-200">
-                      {getDescription(getCurrentWeatherCode())}
-                    </p>
-                  </div>
-                )}
+                {weatherdata?.current && getCurrentWeatherCode() != null && (
+  <div className="flex flex-col items-center mb-2">
+    <div className="w-16 h-16">
+      {getWeatherImage(getCurrentWeatherCode(), getCurrentTime())}
+    </div>
+    <p className="text-lg font-semibold text-blue-200">
+      {getDescription(getCurrentWeatherCode())}
+    </p>
+    <p>
+      Debug: code={String(getCurrentWeatherCode())}, time={String(getCurrentTime())}
+    </p>
+  </div>
+)}
                 {/* ------------------------------------------------ */}
 
                 <p className="text-blue-500 font-bold text-4xl">
