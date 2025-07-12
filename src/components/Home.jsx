@@ -561,9 +561,21 @@ export function Home() {
                   </div>
                 </div>
 
-                
-                
-              
+                {/* Hourly Forecast */}
+                <div className="bg-slate-800/50 hidden backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-xl">
+                  <h3 className="font-bold mb-4">Hourly Forecast</h3>
+                  {weatherdata?.hourly ? (
+                    <Times
+                      hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
+                      temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
+                      weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-slate-500">
+                      No hourly data available
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
