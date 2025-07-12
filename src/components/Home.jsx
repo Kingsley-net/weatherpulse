@@ -395,7 +395,7 @@ export function Home() {
                   <div className="flex justify-between items-start mb-6">
                     
                     <div className='flex'>
-                      <MapPin className='text-slate-400 p-2 '/>
+                      <MapPin className='text-slate-400 text-md font-bold '/>
                      <div> <h2 className="text-2xl font-bold">{cityData}</h2>
                       <p className="text-slate-400">{countryData}</p>
 </div></div>
@@ -561,21 +561,9 @@ export function Home() {
                   </div>
                 </div>
 
-                {/* Hourly Forecast */}
-                <div className="bg-slate-800/50 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-xl">
-                  <h3 className="font-bold mb-4">Hourly Forecast</h3>
-                  {weatherdata?.hourly ? (
-                    <Times
-                      hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
-                      temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
-                      weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
-                    />
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-slate-500">
-                      No hourly data available
-                    </div>
-                  )}
-                </div>
+                
+                
+              
               </div>
             </div>
           )}
