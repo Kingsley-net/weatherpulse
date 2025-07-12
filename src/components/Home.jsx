@@ -1,12 +1,5 @@
-// src/components/Home.jsx
-import {
-  Search,
-  House,
-  MapPin,
-  X
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
-// Import the Times component as default, and the named exports (utilities)
+import { Search, House, MapPin, X } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
 import Times from './time';
 import { getWeatherImage, getDescription } from './unity';
 import { GitGraphIcon } from 'lucide-react';
@@ -44,12 +37,6 @@ ChartJS.register(
   Legend
 );
 
-// Helper: Format ISO time string to 'HH:00'
-const formatTime = (time) => {
-  const date = new Date(time);
-  return date.getHours().toString().padStart(2, '0') + ':00';
-};
-
 export function Home() {
   const [isHovering, setIsHovering] = useState(false);
   const [isHovering2, setIsHovering2] = useState(false);
@@ -65,178 +52,41 @@ export function Home() {
   const [activeSearch, setActiveSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    // Fake data for fallback/testing
-    const fakeData = {
-      current: {
-        temperature_2m: 15.0,
-        wind_speed_10m: 10,
-        wind_direction_10m: 180,
-        weather_code: 0,
-      },
-      hourly: {
-        time: Array.from({ length: 24 }, (_, i) =>
-          new Date(Date.UTC(2025, 4, 3, i)).toISOString()
-        ),
-        temperature_2m: Array.from({ length: 24 }, (_, i) => (15 + i * 0.5).toFixed(1)),
-        weather_code: Array.from({ length: 24 }, (_, i) => [0, 1, 2, 3, 51, 61, 71, 73, 95, 96][i % 10]),
-
-      },
+  // Current date display
+  const currentDate = useMemo(() => {
+    const date = new Date();
+    return {
+      day: date.getDate(),
+      dayOfWeek: date.toLocaleString('en-US', { weekday: 'short' }),
+      month: date.toLocaleString('en-US', { month: 'long' }),
+      year: date.getFullYear()
     };
-
-    const getUserLocation = () => {
-      if (!navigator.geolocation) {
-        setError('Geolocation not supported by your browser.');
-        setWeatherData(fakeData);
-        setCityData('Unknown City');
-        setCountryData('Unknown Country');
-        setLoading(false);
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-            setError('Invalid location coordinates.');
-            setWeatherData(fakeData);
-            setCityData('Unknown City');
-            setCountryData('Unknown Country');
-            setLoading(false);
-            return;
-          }
-
-          setCoordinates({ latitude, longitude });
-
-          try {
-            const weatherResponse = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weather_code&current_weather=true`,
-            );
-            if (!weatherResponse.ok) throw new Error('Weather API call failed.');
-            const weatherData = await weatherResponse.json();
-
-            // Using Nominatim for reverse geocoding
-            const cityUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
-            let cityResponse;
-            try {
-              cityResponse = await fetch(cityUrl, {
-                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
-              });
-              if (!cityResponse.ok) throw new Error('City lookup API failed.');
-            } catch (e) {
-              // Retry once for Nominatim due to rate limits
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-              cityResponse = await fetch(cityUrl, {
-                headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' },
-              });
-              if (!cityResponse.ok) throw new Error('City lookup API failed on retry.');
-            }
-
-            const cityData = await cityResponse.json();
-            const city =
-              cityData.address?.city ||
-              cityData.address?.town ||
-              cityData.address?.village ||
-              cityData.address?.county ||
-              'Unknown Location';
-            const country = cityData.address?.country;
-
-            setWeatherData(weatherData);
-            setCityData(city);
-            setCountryData(country);
-            setLoading(false);
-            setError('');
-          } catch (error) {
-            setError(`Failed to fetch data: ${error.message}`);
-            setWeatherData(fakeData);
-            setCityData('Unknown City');
-            setCountryData('Unknown Country');
-            setLoading(false);
-          }
-        },
-        (error) => {
-          setError(`Location access denied or timed out: ${error.message}`);
-          setWeatherData(fakeData);
-          setCityData('Unknown City');
-          setCountryData('Unknown Country');
-          setLoading(false);
-        },
-        { timeout: 15000, maximumAge: 0, enableHighAccuracy: true }
-      );
-    };
-
-    getUserLocation();
   }, []);
 
-  // Handles closing overlays
-  const handleMap = () => setActive('Home');
-
-  // Handle city search
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery) return;
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
-        { headers: { 'User-Agent': 'WeatherApp/1.0 (your-email@example.com)' } }
-      );
-      if (!response.ok) throw new Error('City search failed.');
-      const data = await response.json();
-      if (data.length === 0) {
-        setError('City not found. Please try a different name.');
-        return;
-      }
-      const { lat, lon, display_name } = data[0];
-      const newLat = parseFloat(lat);
-      const newLon = parseFloat(lon);
-
-      setCoordinates({ latitude: newLat, longitude: newLon });
-      setCityData(display_name.split(',')[0]);
-      setCountryData(display_name.split(',').pop());
-      setActive('Map');
-      setActiveSearch(false);
-      setSearchQuery('');
-
-      const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newLat}&longitude=${newLon}&hourly=temperature_2m,weather_code&current_weather=true`
-      );
-      if (!weatherResponse.ok) throw new Error('Weather data fetch failed for searched city.');
-      const weatherData = await weatherResponse.json();
-      setWeatherData(weatherData);
-      setError('');
-    } catch (error) {
-      setError(`Error searching for city: ${error.message}`);
-    }
+  // Format time for chart
+  const formatTime = (time) => {
+    const date = new Date(time);
+    return date.getHours().toString().padStart(2, '0') + ':00';
   };
 
-  // Navigation items for mobile footer
-  const navItems = [
-    { id: 'Home', label: 'Home', icons: <House size={20} /> },
-    { id: 'Map', label: 'Map', icons: <MapPin size={20} /> },
-    { id: 'Predict', label: 'Predict', icons: <GitGraphIcon size={20} /> },
-  ];
-
-  // Current Date display
-  const date = new Date();
-  const day = date.getDate();
-  const dayOfWeek = date.toLocaleString('en-US', { weekday: 'short' });
-  const month = date.toLocaleString('en-US', { month: 'long' });
-  const year = date.getFullYear();
-
-  // Chart Data
-  const chartData = weatherdata?.hourly && {
-    labels: weatherdata.hourly.time.slice(0, 24).map((time) => formatTime(time)),
-    datasets: [
-      {
-        label: 'Temp (°C)',
-        data: weatherdata.hourly.temperature_2m.slice(0, 24),
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(30, 58, 138, 0.35)',
-        fill: true,
-        tension: 0.4,
-      },
-    ],
-  };
+  // Chart data
+  const chartData = useMemo(() => {
+    if (!weatherdata?.hourly) return null;
+    
+    return {
+      labels: weatherdata.hourly.time.slice(0, 24).map(formatTime),
+      datasets: [
+        {
+          label: 'Temp (°C)',
+          data: weatherdata.hourly.temperature_2m.slice(0, 24),
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(30, 58, 138, 0.35)',
+          fill: true,
+          tension: 0.4,
+        },
+      ],
+    };
+  }, [weatherdata]);
 
   const chartOptions = {
     responsive: true,
@@ -265,311 +115,337 @@ export function Home() {
     },
   };
 
-  // Helpers to get weather
-  const getCurrentTemperature = () =>
-    weatherdata?.current?.temperature_2m ??
-    weatherdata?.current_weather?.temperature ??
-    'N/A';
-  const getCurrentWindDirection = () =>
-    weatherdata?.current?.wind_direction_10m ??
-    weatherdata?.current_weather?.winddirection ??
-    'N/A';
-  const getCurrentWindSpeed = () =>
-    weatherdata?.current?.wind_speed_10m ??
-    weatherdata?.current_weather?.windspeed ??
-    'N/A';
-  // --- New: Get current weather code and time for icon/description ---
-  const getCurrentWeatherCode = () =>
-    weatherdata?.current?.weather_code ??
-    weatherdata?.current_weather?.weathercode ??
-    null;
-  const getCurrentTime = () =>
-    weatherdata?.current?.time ??
-    weatherdata?.current_weather?.time ??
-    null;
-  // -----------------------------------------------------------------
+  // Fetch weather data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Try to get user location
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            timeout: 10000,
+            enableHighAccuracy: true
+          });
+        });
 
+        const { latitude, longitude } = position.coords;
+        setCoordinates({ latitude, longitude });
 
-  // Hover handlers
-  const handleHovering1 = () => setIsHovering(true);
-  const handleHoveringOut1 = () => setIsHovering(false);
-  const handleHovering2 = () => setIsHovering2(true);
-  const handleHoveringOut2 = () => setIsHovering2(false);
-  const handleHovering5 = () => setIsHovering5(true);
-  const handleHoveringOut5 = () => setIsHovering5(false);
-  const handleHovering7 = () => setIsHovering7(true);
-  const handleHoveringOut7 = () => setIsHovering7(false);
+        // Fetch weather data
+        const weatherResponse = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weather_code&current_weather=true`
+        );
+        const weatherData = await weatherResponse.json();
 
-  // Open/close search overlay
-  const searching = (e) => {
+        // Fetch location data
+        const cityResponse = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+          { headers: { 'User-Agent': 'WeatherApp/1.0' } }
+        );
+        const cityData = await cityResponse.json();
+
+        setWeatherData(weatherData);
+        setCityData(
+          cityData.address?.city || 
+          cityData.address?.town || 
+          cityData.address?.village || 
+          cityData.address?.county || 
+          'Your Location'
+        );
+        setCountryData(cityData.address?.country || '');
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Unable to load weather data. Showing sample data.');
+        
+        // Fallback data
+        setWeatherData({
+          current_weather: {
+            temperature: 22.5,
+            windspeed: 8.3,
+            winddirection: 195,
+            weathercode: 1,
+            time: new Date().toISOString()
+          },
+          hourly: {
+            time: Array.from({ length: 24 }, (_, i) => 
+              new Date(Date.now() + i * 3600000).toISOString()
+            ),
+            temperature_2m: Array.from({ length: 24 }, (_, i) => 
+              20 + Math.sin(i / 3) * 5
+            ),
+            weather_code: Array.from({ length: 24 }, (_, i) => 
+              [0, 1, 2, 3][i % 4]
+            )
+          }
+        });
+        setCityData('Sample City');
+        setCountryData('Sample Country');
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Handle city search
+  const handleSearch = async (e) => {
     e.preventDefault();
-    setActiveSearch(true);
-  };
-  const handleCancel = () => {
-    setActiveSearch(false);
-    setSearchQuery('');
-    setError('');
+    if (!searchQuery.trim()) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
+        { headers: { 'User-Agent': 'WeatherApp/1.0' } }
+      );
+      const data = await response.json();
+      
+      if (data.length === 0) {
+        setError('Location not found');
+        return;
+      }
+
+      const { lat, lon, display_name } = data[0];
+      const newCoords = { latitude: parseFloat(lat), longitude: parseFloat(lon) };
+      
+      setCoordinates(newCoords);
+      setCityData(display_name.split(',')[0]);
+      setCountryData(display_name.split(',').pop().trim());
+      setActiveSearch(false);
+      setSearchQuery('');
+
+      // Fetch new weather data
+      const weatherResponse = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${newCoords.latitude}&longitude=${newCoords.longitude}&hourly=temperature_2m,weather_code&current_weather=true`
+      );
+      setWeatherData(await weatherResponse.json());
+      setError('');
+    } catch (err) {
+      setError('Failed to search location');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Navigation items
+  const navItems = [
+    { id: 'Home', label: 'Home', icon: <House size={20} /> },
+    { id: 'Map', label: 'Map', icon: <MapPin size={20} /> },
+    { id: 'Predict', label: 'Predict', icon: <GitGraphIcon size={20} /> },
+  ];
 
   return (
-    <div className=" w-full h-screen custom-bg gap-2 p-2 box-border ">
-      <div className="h-full  w-full custom-bg gap-2 p-2 box-border  ">
-        {/* Sidebar (Desktop only) */}
-        <div className="hidden md:flex md:h-4/5 p-4 fixed left-2 top-1/2 transform -translate-y-1/2 bg-transparent backdrop-blur-md rounded-xl text-white font-bold text-2xl flex-col items-center py-4 shadow-lg z-50">
-          {/* Sidebar Icons with hover and click effects */}
-          <div className="relative">
-            <House
-              onMouseOver={handleHovering1}
-              onMouseOut={handleHoveringOut1}
-              onClick={() => setActive('Home')}
-              className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
-            />
-            {isHovering && (
-              <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Home</p>
-            )}
-          </div>
-          <div className="relative">
-            <MapPin
-              onMouseOver={handleHovering2}
-              onMouseOut={handleHoveringOut2}
-              onClick={() => setActive('Map')}
-              className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
-            />
-            {isHovering2 && (
-              <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Map</p>
-            )}
-          </div>
-          <div className="relative">
-            <GitGraphIcon
-              onMouseOver={handleHovering5}
-              onMouseOut={handleHoveringOut5}
-              onClick={() => setActive('Predict')}
-              className="mb-4 w-5 h-5 hover:scale-125 transition-transform hover:text-blue-400"
-            />
-            {isHovering5 && (
-              <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Predict</p>
-            )}
-          </div>
-          <div className="relative mt-auto">
-            <Search
-              onMouseOver={handleHovering7}
-              onMouseOut={handleHoveringOut7}
-              onClick={searching}
-              className="w-5 h-5 hover:scale-125 transition-transform hover:text-red-400"
-            />
-            {isHovering7 && (
-              <p className="absolute ml-8 bg-gray-800/90 px-1 py-0.5 rounded text-xs shadow-md">Search</p>
-            )}
-          </div>
-        </div>
+    <div className="w-full h-screen bg-gradient-to-br from-blue-900 to-blue-950 overflow-hidden p-2">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex fixed left-2 top-1/2 transform -translate-y-1/2 bg-white/10 backdrop-blur-md rounded-xl p-3 flex-col items-center space-y-4 z-10">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setActive(item.id)}
+            className={`p-2 rounded-lg transition-all ${active === item.id ? 'bg-white/20' : 'hover:bg-white/10'}`}
+            aria-label={item.label}
+          >
+            {item.icon}
+          </button>
+        ))}
+        <button 
+          onClick={() => setActiveSearch(true)}
+          className="p-2 rounded-lg hover:bg-white/10"
+          aria-label="Search"
+        >
+          <Search size={20} />
+        </button>
+      </div>
 
-        {/* Main content area */}
-        <div className="h-full w-full md:pl-10 flex flex-col">
-          {/* Header/Weather Info Card */}
-          <div className="backdrop-filter backdrop-blur-md  rounded-xl p-2 border border-white/10 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <p className="font-bold text-base">WEATHERPULSE</p>
-              <p className="text-base font-semibold">
-                {dayOfWeek}, {day} {month}, {year}
-              </p>
-            </div>
-            {weatherdata && !error ? (
-              <div className="flex flex-col items-center">
-                <div className="flex items-center mb-2">
-                  <MapPin className="text-xl" />
-                  <div className="ml-2">
-                    <p className="text-xl font-bold">{cityData || 'Loading...'}</p>
-                    <p className="text-sm">{countryData || 'Loading...'}</p>
-                  </div>
-                </div>
+      {/* Main Content */}
+      <div className="h-full w-full md:pl-14 flex flex-col space-y-3 overflow-y-auto">
+        {/* Weather Card */}
+        <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
+          <div className="flex justify-between items-center mb-3">
+            <h1 className="font-bold text-lg">WEATHERPULSE</h1>
+            <p className="text-sm">
+              {currentDate.dayOfWeek}, {currentDate.day} {currentDate.month}, {currentDate.year}
+            </p>
+          </div>
 
-                {/* --- New: Display Weather Icon and Description --- */}
-                {weatherdata?.current && getCurrentWeatherCode() != null && (
-  <div className="flex flex-col items-center mb-2">
-    <div className="w-16 h-16">
-      {getWeatherImage(getCurrentWeatherCode(), getCurrentTime())}
-    </div>
-    <p className="text-lg font-semibold text-blue-200">
-      {getDescription(getCurrentWeatherCode())}
-    </p>
-    <p>
-      Debug: code={String(getCurrentWeatherCode())}, time={String(getCurrentTime())}
-    </p>
-  </div>
-)}
-                {/* ------------------------------------------------ */}
-
-                <p className="text-blue-500 font-bold text-4xl">
-                  {getCurrentTemperature()}°C
-                </p>
-
-                <div className="flex justify-around w-full mt-2">
-                  <div>
-                    <p className="text-blue-700 font-bold text-xl">
-                      {getCurrentWindDirection()}°
-                    </p>
-                    <p className="text-xs">Wind Direction</p>
-                  </div>
-                  <div>
-                    <p className="text-blue-500 font-bold text-xl">
-                      {getCurrentWindSpeed()}Km/h
-                    </p>
-                    <p className="text-xs">Wind Speed</p>
-                  </div>
+          {weatherdata?.current_weather ? (
+            <div className="flex flex-col items-center">
+              {/* Location */}
+              <div className="flex items-center mb-3">
+                <MapPin className="mr-2" />
+                <div>
+                  <p className="font-bold">{cityData}</p>
+                  <p className="text-sm opacity-80">{countryData}</p>
                 </div>
               </div>
-            ) : (
-              <div className="text-red-400 text-center text-sm">{error || 'No data available'}</div>
-            )}
-          </div>
 
-          {/* Main Content Area (Home View) */}
-          {active === 'Home' && (
-            <div className="bg-transparent backdrop-filter backdrop-blur-md rounded-xl p-4 overflow-hidden mt-2  flex flex-col md:flex-row gap-4 border border-white/10 shadow-lg">
-              <div className="flex-1">
-                <h1 className="text-xl font-bold text-white text-center">Today's Forecast</h1>
-                {weatherdata?.hourly ? (
-                  <Times
-                    hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
-                    temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
-                    weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
-                     />
-                ) : (
-                  <p className="text-red-400 text-sm">No hourly forecast data</p>
-                )}
-              </div>
-              <div className="flex-1">
-                <h1 className="text-xl font-bold text-white text-center">Forecast Graph</h1>
-                <div className="w-full h-48 md:h-1/2">
-                  {weatherdata?.hourly && chartData ? (
-                    <Line data={chartData} options={chartOptions} />
-                  ) : (
-                    <p className="text-red-400 text-sm">No data for graph</p>
+              {/* Weather Icon and Description */}
+              <div className="flex flex-col items-center my-2">
+                <div className="w-16 h-16">
+                  {getWeatherImage(
+                    weatherdata.current_weather.weathercode,
+                    weatherdata.current_weather.time
                   )}
                 </div>
+                <p className="text-lg font-semibold text-blue-200 mt-1">
+                  {getDescription(weatherdata.current_weather.weathercode)}
+                </p>
               </div>
-            </div>
-          )}
 
-          {/* Footer - Mobile Bottom Navigation */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 shadow-3xl backdrop-blur-xl rounded-t-xl h-auto flex bg-blue-400/20 justify-around items-center z-40 border-t border-white/10">
-            {navItems.map((nav) => (
-              <button
-                key={nav.id}
-                onClick={() => setActive(nav.id)}
-                className={`relative flex flex-col font-bold items-center justify-center py-2 px-3 transition-all duration-200
-                  ${active === nav.id ? 'text-blue-300 font-bold scale-110 drop-shadow-lg' : 'opacity-80 text-white'}`}
-              >
-                <p>{nav.icons}</p>
-                <p className="text-xs mt-1">{nav.label}</p>
-              </button>
-            ))}
-            <button
-              onClick={searching}
-              className="flex flex-col items-center justify-center font-bold py-2 px-3 transition-all duration-200 opacity-80 text-white focus:text-yellow-300"
-            >
-              <Search />
-              <p className="text-xs mt-1">Search</p>
-            </button>
-          </div>
+              {/* Temperature */}
+              <p className="text-4xl font-bold my-2">
+                {weatherdata.current_weather.temperature.toFixed(1)}°C
+              </p>
 
-          {/* Map Overlay */}
-          {active === 'Map' && (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/70 backdrop-blur-2xl">
-              <button className="absolute top-4 right-4 text-white bg-white/10 p-2 rounded-full backdrop-blur-md" onClick={handleMap}>
-                <X />
-              </button>
-              <h1 className="text-xl font-bold text-white mb-2">Map</h1>
-              {coordinates ? (
-                <div className="w-full h-full md:w-4/5 md:h-4/5 rounded-xl overflow-hidden border-2 border-white/20">
-                  <MapContainer
-                    center={[coordinates.latitude, coordinates.longitude]}
-                    zoom={13}
-                    style={{ height: '100%', width: '100%' }}
-                  >
-                    <TileLayer
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                    <Marker position={[coordinates.latitude, coordinates.longitude]}>
-                      <Popup>{cityData || 'Your Location'}</Popup>
-                    </Marker>
-                  </MapContainer>
+              {/* Wind Info */}
+              <div className="flex justify-around w-full mt-3">
+                <div className="text-center">
+                  <p className="font-bold">
+                    {weatherdata.current_weather.winddirection}°
+                  </p>
+                  <p className="text-xs opacity-80">Wind Direction</p>
                 </div>
-              ) : (
-                <p className="text-red-400 text-sm">Map loading or coordinates unavailable</p>
-              )}
-            </div>
-          )}
-
-          {/* Predict Overlay */}
-          {active === 'Predict' && (
-            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/90 backdrop-blur-xl">
-              <button className="absolute top-4 right-4 text-white bg-white/10 p-2 rounded-full backdrop-blur-md" onClick={handleMap}>
-                <X />
-              </button>
-              <h1 className="text-2xl font-bold text-white">Predict</h1>
-              <p className="text-sm text-white">Prediction feature not yet implemented.</p>
-            </div>
-          )}
-
-          {/* Search Overlay */}
-          {activeSearch && (
-            <div className="fixed inset-0 z-50 flex flex-col justify-center items-center bg-gray-950/70 backdrop-blur-xl">
-              <form onSubmit={handleSearch} className="w-4/5 max-w-md flex items-center">
-                <input
-                  type="search"
-                  placeholder="Search city or postal code"
-                  className="text-white w-full bg-white/20 border border-white/30 p-3 rounded-xl backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="ml-2 text-white font-bold bg-blue-500/70 hover:bg-blue-500/90 border border-white/30 p-3 rounded-xl backdrop-blur-md transition-colors"
-                >
-                  Search
-                </button>
-              </form>
-              <button
-                className="text-white font-bold absolute top-4 right-4 rounded-full bg-white/10 p-2 border border-white/30 backdrop-blur-md"
-                onClick={handleCancel}
-              >
-                <X />
-              </button>
-              {error && (
-                <div className="mt-4 text-red-400 text-center text-sm">{error}</div>
-              )}
-            </div>
-          )}
-
-          {/* Weather-like Loading Overlay */}
-          {loading && (
-            <div className="fixed inset-0 flex justify-center items-center bg-gray-950/70 backdrop-blur-2xl z-50">
-              <div className="flex flex-col items-center">
-                <svg width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-cloud-move">
-                  <ellipse cx="60" cy="55" rx="35" ry="18" fill="#dbeafe" />
-                  <ellipse cx="45" cy="45" rx="20" ry="15" fill="#bae6fd" />
-                  <ellipse cx="80" cy="45" rx="24" ry="16" fill="#a5b4fc" />
-                  <ellipse cx="70" cy="60" rx="32" ry="13" fill="#e0e7ff" />
-                </svg>
-                <span className="mt-4 text-blue-100 text-center text-2xl font-extrabold tracking-wide animate-pulse">Loading Weather data please wait...</span>
+                <div className="text-center">
+                  <p className="font-bold">
+                    {weatherdata.current_weather.windspeed} km/h
+                  </p>
+                  <p className="text-xs opacity-80">Wind Speed</p>
+                </div>
               </div>
-              <style>{`
-                @keyframes cloud-move {
-                  0% { transform: translateX(0); }
-                  50% { transform: translateX(10px); }
-                  100% { transform: translateX(0); }
-                }
-                .animate-cloud-move {
-                  animation: cloud-move 2.2s ease-in-out infinite;
-                }
-              `}</style>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              {error || 'Loading weather data...'}
             </div>
           )}
         </div>
+
+        {/* Forecast Section */}
+        {active === 'Home' && (
+          <div className="flex-1 flex flex-col md:flex-row gap-3">
+            {/* Hourly Forecast */}
+            <div className="flex-1 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
+              <h2 className="text-lg font-bold mb-3">Hourly Forecast</h2>
+              {weatherdata?.hourly ? (
+                <Times
+                  hourlyTimes={weatherdata.hourly.time.slice(0, 24)}
+                  temperatures={weatherdata.hourly.temperature_2m.slice(0, 24)}
+                  weatherCode={weatherdata.hourly.weather_code.slice(0, 24)}
+                />
+              ) : (
+                <p>No hourly data available</p>
+              )}
+            </div>
+
+            {/* Temperature Chart */}
+            <div className="flex-1 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 shadow-lg">
+              <h2 className="text-lg font-bold mb-3">Temperature Trend</h2>
+              <div className="h-64">
+                {chartData ? (
+                  <Line data={chartData} options={chartOptions} />
+                ) : (
+                  <p>No chart data available</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Map View */}
+        {active === 'Map' && coordinates && (
+          <div className="flex-1 bg-white/10 backdrop-blur-md rounded-xl overflow-hidden border border-white/10 shadow-lg">
+            <MapContainer
+              center={[coordinates.latitude, coordinates.longitude]}
+              zoom={12}
+              style={{ height: '100%', width: '100%' }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker position={[coordinates.latitude, coordinates.longitude]}>
+                <Popup>{cityData}</Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+        )}
+
+        {/* Predict View */}
+        {active === 'Predict' && (
+          <div className="flex-1 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shadow-lg">
+            <div className="text-center p-4">
+              <h2 className="text-xl font-bold mb-2">Weather Prediction</h2>
+              <p>This feature is coming soon!</p>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-lg border-t border-white/10 flex justify-around py-2 z-10">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setActive(item.id)}
+            className={`flex flex-col items-center p-2 ${active === item.id ? 'text-blue-300' : 'text-white'}`}
+          >
+            {item.icon}
+            <span className="text-xs mt-1">{item.label}</span>
+          </button>
+        ))}
+        <button 
+          onClick={() => setActiveSearch(true)}
+          className="flex flex-col items-center p-2"
+        >
+          <Search size={20} />
+          <span className="text-xs mt-1">Search</span>
+        </button>
+      </div>
+
+      {/* Search Modal */}
+      {activeSearch && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-20 flex items-center justify-center p-4">
+          <div className="bg-white/10 border border-white/20 rounded-xl p-4 w-full max-w-md backdrop-blur-md">
+            <form onSubmit={handleSearch} className="flex space-x-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search city..."
+                className="flex-1 bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                autoFocus
+              />
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                Search
+              </button>
+            </form>
+            <button
+              onClick={() => setActiveSearch(false)}
+              className="absolute top-4 right-4 text-white hover:text-gray-300"
+              aria-label="Close search"
+            >
+              <X size={24} />
+            </button>
+            {error && <p className="text-red-400 mt-2 text-sm">{error}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-pulse">
+              <div className="w-24 h-24 bg-white/20 rounded-full"></div>
+            </div>
+            <p className="mt-4 text-white">Loading weather data...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
