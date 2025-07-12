@@ -40,7 +40,7 @@ export function Home() {
     const fetchWeatherData = async (lat, lon) => {
       try {
         const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&current_weather=true&timezone=auto`
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto`
         );
         const data = await response.json();
         return data;
@@ -58,7 +58,7 @@ export function Home() {
 
         const { latitude, longitude } = position.coords;
         const weatherData = await fetchWeatherData(latitude, longitude);
-        
+
         // Reverse geocoding
         const locationResponse = await fetch(
           `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
@@ -83,7 +83,7 @@ export function Home() {
           loading: false,
           error: "Couldn't fetch weather data. Showing sample data.",
         }));
-        
+
         // Fallback data
         setWeather({
           data: {
@@ -103,7 +103,8 @@ export function Home() {
               ),
               weather_code: Array.from({ length: 24 }, (_, i) => 
                 [0, 1, 2, 3][i % 4]
-              )
+              ),
+              precipitation_probability: Array.from({ length: 24 }, (_, i) => 10 + i)
             }
           },
           loading: false,
@@ -127,12 +128,12 @@ export function Home() {
 
     try {
       setWeather(prev => ({ ...prev, loading: true }));
-      
+
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(ui.searchQuery)}&format=json&limit=1`
       );
       const data = await response.json();
-      
+
       if (data.length === 0) {
         setWeather(prev => ({ ...prev, error: "Location not found", loading: false }));
         return;
@@ -140,9 +141,9 @@ export function Home() {
 
       const { lat, lon, display_name } = data[0];
       const newCoords = { latitude: parseFloat(lat), longitude: parseFloat(lon) };
-      
+
       const weatherData = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${newCoords.latitude}&longitude=${newCoords.longitude}&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum&current_weather=true&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${newCoords.latitude}&longitude=${newCoords.longitude}&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto`
       ).then(res => res.json());
 
       setWeather({
@@ -315,7 +316,7 @@ export function Home() {
       {/* Main Content */}
       <main className="p-4 max-w-6xl mx-auto">
         {/* Current Weather Card */}
-        {weather.data?.current_weather && (
+        {weather.data?.current_weather ? (
           <div className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 rounded-2xl p-6 mb-6 shadow-xl backdrop-blur-sm border border-gray-700">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
               <div>
@@ -330,12 +331,11 @@ export function Home() {
                     {weather.data.current_weather.temperature}°C
                   </div>
                   <div className="text-lg capitalize">
-                    {getDescription(weather.data.current_weather.weathercode)}
+                    {getDescription && getDescription(weather.data.current_weather.weathercode)}
                   </div>
                 </div>
-                
                 <div className="w-24 h-24">
-                  {getWeatherImage(
+                  {getWeatherImage && getWeatherImage(
                     weather.data.current_weather.weathercode,
                     weather.data.current_weather.time
                   )}
@@ -357,6 +357,10 @@ export function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-2xl p-6 mb-6 shadow-xl backdrop-blur-sm border border-gray-700 text-center">
+            <div>No weather data available.</div>
           </div>
         )}
 
