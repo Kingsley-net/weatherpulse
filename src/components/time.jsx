@@ -1,3 +1,75 @@
+ export const isNight = (isoTime) => {
+    try {
+      const date = new Date(isoTime);
+      const hour = parseInt(date.toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        hour: 'numeric',
+        hour12: false
+      }), 10);
+      return hour >= 18 || hour < 6;
+    } catch {
+      return false;
+    }
+  };
+
+  export const getWeatherImage = (code, time) => {
+    const night = isNight(time);
+    switch (code) {
+      case 0: return <SunnyIcon />;
+      case 1:
+      case 2: return <PartlyCloudyIcon />;
+      case 3:
+      case 45:
+      case 48: return <CloudyIcon />;
+      case 51:
+      case 53:
+      case 55:
+      case 61:
+      case 63:
+      case 65:
+      case 80:
+      case 81:
+      case 82: return <RainyIcon />;
+      case 71:
+      case 73:
+      case 75:
+      case 85:
+      case 86: return <SnowyIcon />;
+      case 95:
+      case 96:
+      case 99: return <ThunderstormIcon />;
+      default: return <CloudyIcon />;
+    }
+  };
+
+  export const getDescription = (code) => {
+    switch (code) {
+      case 0: return "Sunny";
+      case 1:
+      case 2: return "Partly Cloudy";
+      case 3:
+      case 45:
+      case 48: return "Cloudy";
+      case 51:
+      case 53:
+      case 55:
+      case 61:
+      case 63:
+      case 65:
+      case 80:
+      case 81:
+      case 82: return "Rainy";
+      case 71:
+      case 73:
+      case 75:
+      case 85:
+      case 86: return "Snowy";
+      case 95:
+      case 96:
+      case 99: return "Thunderstorm";
+      default: return "Unknown";
+    }
+  };
 export default function Times({ hourlyTimes, temperatures, weatherCode, d41escription }) {
   const formatTime = (isoTime) => {
     return new Date(isoTime).toLocaleString('en-US', {
@@ -124,80 +196,6 @@ export default function Times({ hourlyTimes, temperatures, weatherCode, d41escri
     </svg>
   );
 
-  // === UTILS ===
-
-  const isNight = (isoTime) => {
-    try {
-      const date = new Date(isoTime);
-      const hour = parseInt(date.toLocaleString('en-US', {
-        timeZone: 'America/New_York',
-        hour: 'numeric',
-        hour12: false
-      }), 10);
-      return hour >= 18 || hour < 6;
-    } catch {
-      return false;
-    }
-  };
-
-  export const getWeatherImage = (code, time) => {
-    const night = isNight(time);
-    switch (code) {
-      case 0: return <SunnyIcon />;
-      case 1:
-      case 2: return <PartlyCloudyIcon />;
-      case 3:
-      case 45:
-      case 48: return <CloudyIcon />;
-      case 51:
-      case 53:
-      case 55:
-      case 61:
-      case 63:
-      case 65:
-      case 80:
-      case 81:
-      case 82: return <RainyIcon />;
-      case 71:
-      case 73:
-      case 75:
-      case 85:
-      case 86: return <SnowyIcon />;
-      case 95:
-      case 96:
-      case 99: return <ThunderstormIcon />;
-      default: return <CloudyIcon />;
-    }
-  };
-
-  export const getDescription = (code) => {
-    switch (code) {
-      case 0: return "Sunny";
-      case 1:
-      case 2: return "Partly Cloudy";
-      case 3:
-      case 45:
-      case 48: return "Cloudy";
-      case 51:
-      case 53:
-      case 55:
-      case 61:
-      case 63:
-      case 65:
-      case 80:
-      case 81:
-      case 82: return "Rainy";
-      case 71:
-      case 73:
-      case 75:
-      case 85:
-      case 86: return "Snowy";
-      case 95:
-      case 96:
-      case 99: return "Thunderstorm";
-      default: return "Unknown";
-    }
-  };
 
   if (!Array.isArray(hourlyTimes) || !Array.isArray(temperatures) || !Array.isArray(weatherCode)) {
     return <div className="text-red-500">No weather data available</div>;
