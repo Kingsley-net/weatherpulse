@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-export function WeatherApp() {
+export function Home() {
   // State management
   const [weather, setWeather] = useState({
     data: null,
