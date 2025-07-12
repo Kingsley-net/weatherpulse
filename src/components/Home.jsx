@@ -540,7 +540,7 @@ export function Home() {
               </div>
 
               {/* Charts Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
                 {/* Temperature Chart */}
                 <div className="bg-slate-800/50 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 shadow-xl">
                   <div className="flex justify-between items-center mb-4">
