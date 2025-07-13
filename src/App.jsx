@@ -4,6 +4,8 @@ import { Welcome } from './components/welcome';
 import { Analytics } from '@vercel/analytics/react';
  import { UseMobile } from './components/mobile';
 import InstallButton from './InstallButton';
+import { SpeedInsights } from '@vercel/speed-insights/react';
+
 function App() {
   const isMobile = UseMobile()
   return (
@@ -18,6 +20,7 @@ function App() {
 </Router>
 {location.pathname === '/' && <InstallButton />}
 <Analytics />
+<SpeedInsights />
     </>
   )
 }
