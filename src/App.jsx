@@ -1,8 +1,8 @@
 import { Home } from './components/Home'
 import {BrowserRouter as Router, Routes, Route,Navigate} from 'react-router-dom';
 import { Welcome } from './components/welcome';
-
-import { UseMobile } from './components/mobile';
+import { Analytics } from '@vercel/analytics/react';
+ import { UseMobile } from './components/mobile';
 import InstallButton from './InstallButton';
 function App() {
   const isMobile = UseMobile()
@@ -17,7 +17,7 @@ function App() {
 
 </Router>
 {location.pathname === '/' && <InstallButton />}
-
+<Analytics />
     </>
   )
 }
